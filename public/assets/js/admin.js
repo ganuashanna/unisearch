@@ -1,101 +1,94 @@
 /**
- * UniSearch Admin Dashboard JS
+ * UniSearch BAMU Edition - Admin Dashboard JS
  */
 
 const adminState = {
-    token: localStorage.getItem('uni_admin_token'),
-    activeNav: 'overview'
+  token: localStorage.getItem('uni_admin_token'),
+  activeNav: 'overview',
+  activeStudent: null
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!adminState.token) { window.location.href = '/admin'; return; }
     
-    setupAdminNav();
     loadDashboardStats();
     setupUploadZone();
-    setupSemesterSearch();
+    setupAcademicSearch();
     
-    document.getElementById('logoutBtn').onclick = logout;
+    // Auto-load section from URL or default
+    const hash = window.location.hash.replace('#', '');
+    if (hash) switchSection(hash);
 });
 
-function setupAdminNav() {
-    document.querySelectorAll('.nav-item').forEach(nav => {
-        nav.onclick = (e) => {
-            if (nav.dataset.nav) {
-                e.preventDefault();
-                switchNav(nav.dataset.nav);
-            }
-        };
-    });
+function logout() {
+    localStorage.removeItem('uni_admin_token');
+    window.location.href = '/admin';
 }
 
-function switchNav(nav) {
-    adminState.activeNav = nav;
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.nav === nav));
-    document.querySelectorAll('.section-panel').forEach(s => s.classList.toggle('hidden', s.id !== `section${capitalize(nav)}`));
+/**
+ * SECTION NAVIGATION
+ */
+function switchSection(id) {
+    adminState.activeNav = id;
+    document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+    document.getElementById(`section_${id}`).classList.remove('hidden');
     
-    // Update headers
-    const title = {
-        overview: 'System Overview',
-        import: 'Import Data',
-        students: 'Student Management',
-        semesters: 'Academic Records'
-    }[nav];
-    document.getElementById('pageTitle').textContent = title;
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.classList.toggle('active', link.onclick.toString().includes(id));
+    });
+
+    const title = { overview: 'System Overview', import: 'Bulk Student Import', academic: 'Academic Records' }[id];
+    document.getElementById('sectionTitle').textContent = title;
+    
+    const icon = { overview: 'fa-chart-line', import: 'fa-file-import', academic: 'fa-graduation-cap' }[id];
+    document.getElementById('sectionTitleIcon').innerHTML = `<i class="fa ${icon}"></i>`;
 }
 
+/**
+ * DASHBOARD OVERVIEW
+ */
 async function loadDashboardStats() {
     try {
-        const res = await fetch('/api/stats', {
-            headers: { 'Authorization': `Bearer ${adminState.token}` }
-        });
+        const res = await fetch('/api/stats');
         const data = await res.json();
         
-        // CountUp animations
-        new countUp.CountUp('dStatTotal', data.total_students).start();
-        new countUp.CountUp('dStatActive', data.active_students).start();
-        new countUp.CountUp('dStatGrad', data.graduated_students).start();
-        new countUp.CountUp('dStatDepts', data.departments_count).start();
+        document.getElementById('statTotalStudents').textContent = data.total_students || 0;
+        document.getElementById('statActiveStudents').textContent = data.active_students || 0;
+        document.getElementById('statDepartments').textContent = data.total_departments || 0;
+        document.getElementById('statAvgCGPA').textContent = data.avg_cgpa || '0.00';
         
-        renderBatchChart(data.batches, data.total_students); 
-        // Example perf data (in real app, use the API response)
-        renderPerfChart(data.batches);
-    } catch (err) { console.error('Stats failed', err); }
+        renderBatchDistribution(data.batch_breakdown);
+    } catch (e) {
+        console.error('Stats failed', e);
+        showToast('Failed to load dashboard statistics', 'error');
+    }
 }
 
-function renderBatchChart(batches, total) {
+function renderBatchDistribution(batches) {
     const container = document.getElementById('batchChart');
-    container.innerHTML = '';
-    // Mock counts for visual demo
-    batches.forEach(year => {
-        const mockCount = Math.floor(Math.random() * 50) + 20;
-        const width = (mockCount / 80) * 100;
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        row.innerHTML = `
-            <div class="bar-label">${year}</div>
-            <div class="bar-track"><div class="bar-fill" style="width: ${width}%"></div></div>
-            <div class="bar-value">${mockCount}</div>
+    if (!batches || Object.keys(batches).length === 0) {
+        container.innerHTML = '<div class="text-center text-xs text-gray-400 py-10 font-bold uppercase tracking-widest">No data available</div>';
+        return;
+    }
+    
+    const max = Math.max(...Object.values(batches));
+    let html = '';
+    
+    Object.entries(batches).forEach(([year, count]) => {
+        const width = (count / max) * 100;
+        html += `
+            <div class="space-y-1 group">
+                <div class="flex justify-between items-end">
+                    <span class="text-[10px] font-black text-navy uppercase tracking-widest">${year} Batch</span>
+                    <span class="text-[10px] font-bold text-gray-400 group-hover:text-orange transition-colors">${count} Students</span>
+                </div>
+                <div class="h-2 bg-gray-50 rounded-full border border-gray-100 overflow-hidden">
+                    <div class="h-full bg-navy group-hover:bg-orange transition-all duration-500 rounded-full" style="width: ${width}%"></div>
+                </div>
+            </div>
         `;
-        container.appendChild(row);
     });
-}
-
-function renderPerfChart(batches) {
-    const container = document.getElementById('perfChart');
-    container.innerHTML = '';
-    batches.forEach(year => {
-        const mockGPA = (Math.random() * 2 + 7).toFixed(2);
-        const width = (mockGPA / 10) * 100;
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        row.innerHTML = `
-            <div class="bar-label">${year}</div>
-            <div class="bar-track"><div class="bar-fill" style="width: ${width}%; background: var(--cyan)"></div></div>
-            <div class="bar-value">${mockGPA}</div>
-        `;
-        container.appendChild(row);
-    });
+    container.innerHTML = html;
 }
 
 /**
@@ -104,304 +97,204 @@ function renderPerfChart(batches) {
 function setupUploadZone() {
     const zone = document.getElementById('dropZone');
     const input = document.getElementById('fileInput');
-    
-    document.getElementById('browseBtn').onclick = () => input.click();
-    
-    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('dragging'); };
-    zone.ondragleave = () => zone.classList.remove('dragging');
+
+    input.onchange = (e) => handleFileSelection(e.target.files[0]);
+
+    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('drag-over'); };
+    zone.ondragleave = () => zone.classList.remove('drag-over');
     zone.ondrop = (e) => {
         e.preventDefault();
-        zone.classList.remove('dragging');
-        handleFile(e.dataTransfer.files[0]);
+        zone.classList.remove('drag-over');
+        handleFileSelection(e.dataTransfer.files[0]);
     };
-    
-    input.onchange = (e) => handleFile(e.target.files[0]);
-    
-    document.getElementById('downloadTemplate').onclick = generateTemplate;
 }
 
-let activeFile = null;
+let activeImportFile = null;
 
-function handleFile(file) {
+function handleFileSelection(file) {
     if (!file) return;
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (!['xlsx', 'xls', 'csv'].includes(ext)) {
-        showToast('Only XLSX and CSV files supported.', 'error');
+    if (!file.name.endsWith('.csv')) {
+        showToast('Only CSV files are supported.', 'error');
         return;
     }
     
-    activeFile = file;
-    document.getElementById('fileNameLabel').textContent = file.name;
-    document.getElementById('fileSizeLabel').textContent = `${(file.size/1024).toFixed(1)} KB · Preparing for import`;
-    document.getElementById('previewArea').classList.remove('hidden');
-    document.getElementById('previewIcon').className = ext === 'csv' ? 'fas fa-file-csv' : 'fas fa-file-excel';
-    
-    // Simple preview logic
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
-        
-        renderPreview(rows.slice(0, 6));
-        document.getElementById('fileSizeLabel').textContent = `${(file.size/1024).toFixed(1)} KB · ${rows.length-1} rows found`;
-    };
-    reader.readAsArrayBuffer(file);
+    activeImportFile = file;
+    document.getElementById('filePreview').classList.remove('hidden');
+    document.getElementById('previewFileName').textContent = file.name;
+    document.getElementById('previewFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
+    document.getElementById('importProgress').classList.add('hidden');
+    document.getElementById('progressFill').style.width = '0%';
 }
 
-function renderPreview(rows) {
-    const head = document.getElementById('previewHeaders');
-    const body = document.getElementById('previewRows');
-    head.innerHTML = '';
-    body.innerHTML = '';
+async function doImport() {
+    if (!activeImportFile) return;
     
-    if (rows.length === 0) return;
-    
-    const headers = rows[0];
-    const headerRow = document.createElement('tr');
-    headers.forEach(h => {
-        const th = document.createElement('th');
-        th.textContent = h;
-        headerRow.appendChild(th);
-    });
-    head.appendChild(headerRow);
-    
-    rows.slice(1).forEach(r => {
-        const tr = document.createElement('tr');
-        headers.forEach((h, i) => {
-            const td = document.createElement('td');
-            td.textContent = r[i] || '';
-            tr.appendChild(td);
-        });
-        body.appendChild(tr);
-    });
-}
-
-document.getElementById('importNowBtn').onclick = async () => {
-    if (!activeFile) return;
-    
-    const btn = document.getElementById('importNowBtn');
+    const btn = document.getElementById('importBtn');
     btn.disabled = true;
-    btn.innerHTML = '<div class="spinner"></div> Importing...';
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i> Initializing...';
     
     document.getElementById('importProgress').classList.remove('hidden');
     const fill = document.getElementById('progressFill');
-    const label = document.getElementById('percentLabel');
-    fill.style.width = '0%';
-    label.textContent = '0%';
-    
-    // Simulate progress while uploading
-    let prog = 0;
-    const int = setInterval(() => {
-        prog = Math.min(prog + 10, 95);
-        fill.style.width = `${prog}%`;
-        label.textContent = `${prog}%`;
-    }, 200);
+    const label = document.getElementById('progressLabel');
 
-    const formData = new FormData();
-    formData.append('file', activeFile);
-    
+    const fd = new FormData();
+    fd.append('file', activeImportFile);
+
     try {
         const res = await fetch('/api/upload', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${adminState.token}` },
-            body: formData
+            body: fd
         });
+        
         const data = await res.json();
-        
-        clearInterval(int);
-        fill.style.width = '100%';
-        label.textContent = '100%';
-        
-        if (data.imported > 0) {
-            showToast(`Success! ${data.imported} students imported.`, 'success');
-            setTimeout(() => location.reload(), 2000);
+        if (res.ok && data.success) {
+            fill.style.width = '100%';
+            label.textContent = `Completed! ${data.imported} Students Imported Successfully.`;
+            showToast(`${data.imported} records processed.`, 'success');
+            setTimeout(() => { if(confirm('Refresh dashboard to see stats?')) location.reload(); }, 2000);
         } else {
             throw new Error(data.error || 'Import failed');
         }
-    } catch (err) {
-        clearInterval(int);
-        showToast(err.message, 'error');
+    } catch (e) {
+        showToast(e.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = 'Import Students →';
+        btn.innerHTML = '<i class="fa fa-play mr-2"></i> Start Importing Now';
     }
-};
+}
+
+function downloadTemplate() {
+    const csvContent = "data:text/csv;charset=utf-8,full_name,student_id,email,phone_number,department_name,admission_year,graduation_year,current_year,current_semester,enrollment_status,gender,blood_group,date_of_birth,address,account_number,guardian_name,guardian_phone\r\n"
+        + "Ganesh Shinde,CS2021001,ganesh.s@bamu.ac.in,9876543210,Computer Science,2021,,4,7,active,Male,A+,2003-05-15,\"Chhatrapati Sambhajinagar\",ACC12345,Mahesh Shinde,9988776655\r\n"
+        + "Anjali Jadhav,MBA2023015,anjali.j@bamu.ac.in,9000011111,MBA,2023,,2,3,active,Female,B+,2002-11-20,\"Aurangabad\",ACC67890,Rahul Jadhav,9123456789";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "bamu_unisearch_template.csv");
+    document.body.appendChild(link);
+    link.click();
+}
 
 /**
- * SEMESTERS
+ * ACADEMIC RECORDS
  */
-function setupSemesterSearch() {
-    const input = document.getElementById('semStudentSearch');
-    const dropdown = document.getElementById('semAutocomplete');
+function setupAcademicSearch() {
+    const input = document.getElementById('studentSearchInput');
+    const dd = document.getElementById('adminAutocomplete');
     
     input.oninput = async (e) => {
-        const q = e.target.value;
-        if (q.length < 2) { dropdown.classList.add('hidden'); return; }
+        const q = e.target.value.trim();
+        if (q.length < 2) { dd.classList.add('hidden'); return; }
         
-        const params = new URLSearchParams({q, limit: 5});
-        const res = await fetch(`/api/search?${params.toString()}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=8`);
         const data = await res.json();
         
-        renderSemAutocomplete(data.data);
+        if (!data.data?.length) { dd.classList.add('hidden'); return; }
+        
+        dd.innerHTML = data.data.map(s => `
+           <div class="autocomplete-item flex items-center gap-3" onclick="loadStudentForAcademic('${s.id}')">
+              <div class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center font-bold text-xs">${s.full_name[0]}</div>
+              <div>
+                 <p class="font-bold text-navy h-4 overflow-hidden">${s.full_name}</p>
+                 <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">${s.student_id}</p>
+              </div>
+           </div>
+        `).join('');
+        dd.classList.remove('hidden');
     };
 }
 
-function renderSemAutocomplete(students) {
-    const dropdown = document.getElementById('semAutocomplete');
-    dropdown.innerHTML = '';
-    
-    if (students.length === 0) { dropdown.classList.add('hidden'); return; }
-    
-    students.forEach(s => {
-        const item = document.createElement('div');
-        item.className = 'px-4 py-3 hover:bg-indigo-600/10 cursor-pointer flex items-center justify-between group';
-        item.innerHTML = `
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-indigo-600/10 flex items-center justify-center text-indigo-400 font-bold text-[10px]">${s.full_name[0]}</div>
-                <div>
-                    <h5 class="text-xs font-bold">${s.full_name}</h5>
-                    <p class="text-[9px] text-gray-500 uppercase">${s.student_id}</p>
-                </div>
-            </div>
-            <i class="fas fa-chevron-right text-[10px] text-gray-700 group-hover:text-indigo-400"></i>
-        `;
-        item.onclick = () => loadStudentForSem(s.id);
-        dropdown.appendChild(item);
-    });
-    dropdown.classList.remove('hidden');
-}
-
-let activeStudentForSem = null;
-
-async function loadStudentForSem(id) {
-    document.getElementById('semAutocomplete').classList.add('hidden');
-    document.getElementById('semStudentSearch').value = '';
+async function loadStudentForAcademic(id) {
+    document.getElementById('adminAutocomplete').classList.add('hidden');
+    document.getElementById('studentSearchInput').value = '';
     
     try {
         const res = await fetch(`/api/student?id=${id}`);
         const s = await res.json();
-        activeStudentForSem = s;
+        adminState.activeStudent = s;
         
-        document.getElementById('semActiveStudent').classList.remove('hidden');
-        document.getElementById('semSName').textContent = s.full_name;
-        document.getElementById('semSID').textContent = s.student_id;
-        document.getElementById('semSAvatar').textContent = s.full_name[0];
+        document.getElementById('manageStudentArea').classList.remove('hidden');
+        document.getElementById('asName').textContent = s.full_name;
+        document.getElementById('asID').textContent = s.student_id;
+        document.getElementById('asAvatar').textContent = s.full_name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
         
-        renderStudentSems(s.semesters);
-    } catch (err) { showToast('Failed to load student.', 'error'); }
+        renderAcademicSems(s.semesters);
+    } catch (e) { showToast('Load failed', 'error'); }
 }
 
-function renderStudentSems(sems) {
-    const grid = document.getElementById('studentSemsGrid');
-    grid.innerHTML = '';
-    
+function renderAcademicSems(sems) {
+    const grid = document.getElementById('asSemsGrid');
     if (!sems || sems.length === 0) {
-        grid.innerHTML = '<div class="col-span-full py-10 text-center text-gray-500 text-sm">No semester results found.</div>';
+        grid.innerHTML = `<div class="col-span-full py-10 text-center text-gray-300 font-bold uppercase tracking-widest text-xs">No results recorded yet.</div>`;
         return;
     }
     
-    sems.forEach(sem => {
-        const div = document.createElement('div');
-        div.className = `sem-block ${sem.result}`;
-        div.innerHTML = `
-            <div class="flex items-center justify-between mb-4">
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Sem ${sem.semester_number}</span>
-                <span class="status-pill status-${sem.result === 'pass' ? 'active' : sem.result === 'fail' ? 'dropped' : 'suspended'}">${sem.result}</span>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase">SGPA</p>
-                    <p class="font-bold text-white">${sem.sgpa}</p>
-                </div>
-                <div>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase">CGPA</p>
-                    <p class="font-bold text-indigo-400">${sem.cgpa}</p>
-                </div>
-            </div>
-        `;
-        grid.appendChild(div);
-    });
+    grid.innerHTML = sems.map(sem => `
+        <div class="sem-block bg-white border border-gray-100 p-6 flex flex-col justify-between ${sem.result}">
+           <div class="flex justify-between items-start mb-4">
+              <span class="text-[10px] font-black text-gray-300 uppercase tracking-widest">Sem ${sem.semester_number}</span>
+              <span class="text-[9px] font-bold text-navy bg-gray-50 px-2 py-0.5 rounded border border-gray-100 uppercase">${sem.result}</span>
+           </div>
+           <div class="grid grid-cols-2 gap-4 h-12">
+              <div><p class="text-[9px] font-black text-gray-400 uppercase">SGPA</p><p class="text-sm font-black text-navy">${sem.sgpa}</p></div>
+              <div><p class="text-[9px] font-black text-gray-400 uppercase">CGPA</p><p class="text-sm font-black text-orange">${sem.cgpa}</p></div>
+           </div>
+           <div class="mt-4 pt-3 border-t border-gray-50 text-[9px] text-gray-400 font-bold uppercase flex justify-between">
+              <span>${sem.academic_year} AY</span>
+              <span>${sem.attendance_pct}% ATT.</span>
+           </div>
+        </div>
+    `).join('');
 }
 
-document.getElementById('addSemBtn').onclick = () => {
-    document.getElementById('addSemModal').style.display = 'flex';
-};
-
-document.getElementById('closeSemModal').onclick = () => {
-    document.getElementById('addSemModal').style.display = 'none';
-};
+function openAddSemModal() {
+    document.getElementById('semModal').classList.remove('hidden');
+}
 
 document.getElementById('semForm').onsubmit = async (e) => {
     e.preventDefault();
-    if (!activeStudentForSem) return;
+    if (!adminState.activeStudent) return;
     
-    const formData = new FormData(e.target);
+    const fd = new FormData(e.target);
     const body = {
-        student_id: activeStudentForSem.id,
-        semester_number: parseInt(formData.get('semester_number')),
-        academic_year: formData.get('academic_year'),
-        sgpa: parseFloat(formData.get('sgpa')),
-        cgpa: parseFloat(formData.get('cgpa')),
-        attendance_pct: parseFloat(formData.get('attendance_pct')),
-        result: formData.get('result')
+        action: 'upsert_semester',
+        data: {
+            student_id: adminState.activeStudent.id,
+            semester_number: parseInt(fd.get('semester_number')),
+            academic_year: fd.get('academic_year'),
+            sgpa: parseFloat(fd.get('sgpa')),
+            cgpa: parseFloat(fd.get('cgpa')),
+            attendance_pct: parseFloat(fd.get('attendance_pct')),
+            result: fd.get('result')
+        }
     };
-
+    
+    showToast('Saving result...', 'info');
     try {
-        // Direct upsert to Supabase semesters (simplified from PHP if needed or via new API)
-        // Here we can use a new endpoint or the standard REST with Service Role
-        showToast('Saving result...', 'info');
-        
-        // We'll use the supabase_request pattern from local helper or create a dedicated endpoint
-        // For efficiency, let's assume we have a simple upsert in api/upload.php extended or standard rest
-        const res = await fetch(`/api/upload`, {
+        const res = await fetch('/api/upload', {
             method: 'POST',
             headers: { 
                 'Authorization': `Bearer ${adminState.token}`,
                 'Content-Type': 'application/json' 
             },
-            body: JSON.stringify({ action: 'upsert_semester', data: body })
+            body: JSON.stringify(body)
         });
-        
-        showToast('Semester added successfully!', 'success');
-        document.getElementById('addSemModal').style.display = 'none';
-        loadStudentForSem(activeStudentForSem.id); // Refresh
-    } catch (err) { showToast('Failed to save semester.', 'error'); }
+        if (res.ok) {
+            showToast('Semester added successfully!', 'success');
+            document.getElementById('semModal').classList.add('hidden');
+            loadStudentForAcademic(adminState.activeStudent.id);
+        } else throw new Error('Failed to save');
+    } catch (e) { showToast(e.message, 'error'); }
 };
 
 /**
- * UTILS
+ * UI UTILS
  */
-function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-function logout() {
-    localStorage.removeItem('uni_admin_token');
-    window.location.href = '/admin';
-}
-
-function generateTemplate() {
-    const headers = [
-        ['full_name', 'student_id', 'email', 'phone_number', 'department_name', 'admission_year', 'graduation_year', 'current_year', 'current_semester', 'enrollment_status', 'gender', 'date_of_birth', 'address', 'account_number', 'guardian_name', 'guardian_phone']
-    ];
-    const data = [
-        ['Aarav Sharma', 'S2021001', 'aarav.s@university.edu', '+91 9876543210', 'Computer Science', 2021, '', 4, 7, 'active', 'Male', '2003-05-15', '123 Mumbai St', 'ACC12345', 'Ravi Sharma', '+91 9123456789'],
-        ['Ishani Patel', 'S2022045', 'ishani.p@university.edu', '+91 9000012345', 'Data Science', 2022, '', 3, 5, 'active', 'Female', '2004-09-20', '45 Ahmedabad Rd', 'ACC67890', 'Anil Patel', '+91 9000054321']
-    ];
-    
-    const ws = XLSX.utils.aoa_to_sheet(headers.concat(data));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Students");
-    XLSX.writeFile(wb, "UniSearch_Import_Template.xlsx");
-}
-
 function showToast(msg, type='success') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':type==='error'?'fa-exclamation-circle':'fa-info-circle'}"></i> ${msg}`;
-    document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fa fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> <span>${msg}</span>`;
+    document.body.appendChild(t);
+    setTimeout(() => t.style.opacity = '0', 3000);
+    setTimeout(() => t.remove(), 3400);
 }

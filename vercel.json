@@ -1,6 +1,7 @@
 {
   "version": 2,
   "routes": [
+    { "src": "/api/seed", "dest": "/api/seed.js" },
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
     { "src": "/admin",    "dest": "/public/admin.html" },
     { "src": "/dashboard","dest": "/public/dashboard.html" },

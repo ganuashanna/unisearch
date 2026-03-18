@@ -1,413 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UniSearch | Student Database</title>
-    
-    <!-- Meta tags for SEO -->
-    <meta name="description" content="Next-gen university student search portal. Manage and filter student data instantly.">
-    
-    <!-- CDNs -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <link rel="stylesheet" href="/assets/css/style.css">
-    
-    <script>
-        // Init theme before body loads to prevent flicker
-        if (localStorage.getItem('uni_theme') === 'light') {
-            document.documentElement.classList.add('light');
-        } else {
-            localStorage.setItem('uni_theme', 'dark');
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniSearch | Dr. BAMU Student Database</title>
+  <meta name="description" content="Official student search portal of Dr. Babasaheb Ambedkar Marathwada University">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body class="bg-[#07070F] text-[#F0F0FF] dark-theme transition-colors duration-300">
-    <!-- 1. NAVBAR -->
-    <nav class="glass glass-nav sticky top-0 z-50">
-        <div class="container mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-indigo-500/30">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight">UniSearch</h1>
-                    <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-[0.2em] leading-none">Student Portal</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <!-- Live indicator -->
-                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                    <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                    <span class="text-[11px] font-bold text-emerald-500 uppercase tracking-wider">Live System</span>
-                </div>
-                
-                <div class="flex items-center gap-3">
-                    <button id="themeToggle" class="theme-switch text-indigo-400 text-lg">
-                        <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:block"></i>
-                    </button>
-                    <a href="/admin" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-sm transition-all shadow-lg shadow-indigo-600/20">
-                        Admin Portal
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
+<body>
 
-    <!-- 2. HERO SECTION -->
-    <section class="relative pt-20 pb-12 overflow-hidden">
-        <!-- Background accents -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-600/10 blur-[120px] rounded-full -z-10"></div>
-        
-        <div class="container mx-auto px-6 text-center max-w-4xl">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-600/10 border border-indigo-500/20 rounded-full mb-8" data-aos="fade-down">
-                <span class="text-xs font-bold text-indigo-400 uppercase tracking-widest">🎓 Next-Gen University Portal</span>
-            </div>
-            
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6" data-aos="fade-up">
-                Find Any Student <br>
-                <span class="gradient-text">Instantly.</span>
-            </h1>
-            <p class="text-gray-400 text-lg mb-12 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
-                Advanced search and analytics for the modern campus. Access comprehensive academic records, 
-                semester performance, and enrollment tracking in real-time.
-            </p>
-            
-            <!-- Hero Search Bar -->
-            <div class="relative w-full mb-16" data-aos="fade-up" data-aos-delay="200">
-                <i class="fas fa-search absolute left-8 top-1/2 -translate-y-1/2 text-gray-500 text-xl"></i>
-                <input type="text" id="mainSearch" 
-                       class="hero-search" 
-                       placeholder="Search by name, ID, email, or department..."
-                       autocomplete="off">
-                <div id="autocompleteDropdown" class="absolute top-full left-0 right-0 mt-3 glass rounded-2xl overflow-hidden hidden z-40 p-2 border-indigo-500/20">
-                </div>
-            </div>
-            
-            <!-- Quick Stats Row -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="300">
-                <div class="glass p-6 rounded-2xl border-indigo-500/10">
-                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Total Students</p>
-                    <h3 id="statTotal" class="text-3xl font-bold">0</h3>
-                </div>
-                <div class="glass p-6 rounded-2xl border-indigo-500/10">
-                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Active Batches</p>
-                    <h3 id="statBatches" class="text-3xl font-bold">0</h3>
-                </div>
-                <div class="glass p-6 rounded-2xl border-indigo-500/10">
-                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Departments</p>
-                    <h3 id="statDepts" class="text-3xl font-bold">0</h3>
-                </div>
-                <div class="glass p-6 rounded-2xl border-indigo-500/10">
-                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Active Students</p>
-                    <h3 id="statActive" class="text-3xl font-bold">0</h3>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="top-bar">
+  <span>
+    <img src="http://bamu.ac.in/images/icon.png" style="height:16px;vertical-align:middle;margin-right:6px">
+    महाराष्ट्र शासन | Government of Maharashtra
+  </span>
+  <span>
+    <a href="http://bamu.ac.in" target="_blank" style="color:#aaa;text-decoration:none">
+      Visit Official University Website →
+    </a>
+  </span>
+</div>
 
-    <!-- 3. FILTER PANEL -->
-    <section class="container mx-auto px-6 mb-12">
-        <div class="glass p-8 rounded-3xl border-indigo-500/10">
-            <!-- Row 1: Status Pills -->
-            <div class="flex items-center gap-6 mb-8 border-b border-indigo-500/10 pb-6 overflow-x-auto no-scrollbar">
-                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest shrink-0">Status:</span>
-                <div class="flex gap-2" id="statusPills">
-                    <button class="status-pill-btn active" data-status="">All</button>
-                    <button class="status-pill-btn" data-status="active">Active</button>
-                    <button class="status-pill-btn" data-status="graduated">Graduated</button>
-                    <button class="status-pill-btn" data-status="dropped">Dropped</button>
-                    <button class="status-pill-btn" data-status="transferred">Transferred</button>
-                    <button class="status-pill-btn" data-status="suspended">Suspended</button>
-                </div>
-            </div>
-            
-            <!-- Row 2: Select Filters -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="flex flex-col gap-2">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Department</label>
-                    <select id="filterDept" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 outline-none">
-                        <option value="">All Departments</option>
-                    </select>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Admission Year</label>
-                    <select id="filterBatch" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 outline-none">
-                        <option value="">All Admission Years</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                        <option value="2021">2021</option>
-                        <option value="2020">2020</option>
-                        <option value="2019">2019</option>
-                        <option value="2018">2018</option>
-                    </select>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Graduation Year</label>
-                    <select id="filterGrad" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 outline-none">
-                        <option value="">All</option>
-                        <option value="enrolled">Still Enrolled</option>
-                        <option value="2028">2028 (Expected)</option>
-                        <option value="2027">2027 (Expected)</option>
-                        <option value="2026">2026 (Expected)</option>
-                        <option value="2025">2025 (Expected)</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                    </select>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Study Year</label>
-                    <div class="flex gap-2" id="yearPills">
-                        <button class="year-pill active" data-year="">All</button>
-                        <button class="year-pill" data-year="1">1</button>
-                        <button class="year-pill" data-year="2">2</button>
-                        <button class="year-pill" data-year="3">3</button>
-                        <button class="year-pill" data-year="4">4</button>
-                        <button class="year-pill" data-year="5">5</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Row 3: Sort & Export -->
-            <div class="flex flex-wrap items-center justify-between gap-6 pt-6 border-t border-indigo-500/10">
-                <div class="flex items-center gap-4">
-                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Sort:</span>
-                    <select id="sortBy" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none">
-                        <option value="full_name">Name (A-Z)</option>
-                        <option value="student_id">Student ID</option>
-                        <option value="admission_year">Admission Year</option>
-                        <option value="created_at">Join Date</option>
-                    </select>
-                    <div class="flex bg-indigo-600/5 p-1 rounded-xl border border-indigo-500/20">
-                        <button id="viewTable" class="px-3 py-1.5 rounded-lg text-xs font-bold active-view"><i class="fas fa-list mr-2"></i>Table</button>
-                        <button id="viewGrid" class="px-3 py-1.5 rounded-lg text-xs font-bold"><i class="fas fa-th-large mr-2"></i>Grid</button>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-3">
-                    <button id="exportPDF" class="px-4 py-2 bg-indigo-500/10 border border-indigo-400/20 rounded-xl text-xs font-bold text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all">
-                        <i class="far fa-file-pdf mr-2 text-sm"></i>PDF
-                    </button>
-                    <button id="exportExcel" class="px-4 py-2 bg-emerald-500/10 border border-emerald-400/20 rounded-xl text-xs font-bold text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all">
-                        <i class="far fa-file-excel mr-2 text-sm"></i>Excel
-                    </button>
-                    <button id="exportCSV" class="px-4 py-2 bg-gray-500/10 border border-gray-400/20 rounded-xl text-xs font-bold text-gray-400 hover:bg-gray-500 hover:text-white transition-all">
-                        <i class="fas fa-file-csv mr-2 text-sm"></i>CSV
-                    </button>
-                </div>
-            </div>
+<nav class="navbar">
+  <div style="max-width:1200px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:14px">
+      <img src="http://bamu.ac.in/images/logo.png" alt="BAMU Logo" style="height:52px;filter:brightness(1.1)">
+      <div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.6);line-height:1.2">
+          Dr. Babasaheb Ambedkar Marathwada University
         </div>
-    </section>
-
-    <!-- 4. RESULTS AREA -->
-    <main class="container mx-auto px-6 mb-20 min-h-[400px]">
-        <div id="loading" class="hidden">
-            <div class="grid grid-cols-1 gap-4">
-                <div class="h-12 skeleton w-full"></div>
-                <div class="h-12 skeleton w-full"></div>
-                <div class="h-12 skeleton w-full"></div>
-                <div class="h-12 skeleton w-full"></div>
-                <div class="h-12 skeleton w-full"></div>
-            </div>
+        <div style="font-weight:700;color:white;font-size:1.1rem;letter-spacing:-0.02em">
+          UniSearch
+          <span style="font-size:0.7rem;background:var(--orange);padding:2px 8px;border-radius:4px;font-weight:600;margin-left:6px;vertical-align:middle">
+            Student Portal
+          </span>
         </div>
-        
-        <div id="resultsContent">
-            <!-- Table View (Default) -->
-            <div id="tableView" class="overflow-x-auto no-scrollbar">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th class="w-12">#</th>
-                            <th onclick="setSort('full_name')">Student Info <i class="fas fa-sort ml-1 opacity-50"></i></th>
-                            <th onclick="setSort('student_id')">ID <i class="fas fa-sort ml-1 opacity-50"></i></th>
-                            <th onclick="setSort('department_name')">Department <i class="fas fa-sort ml-1 opacity-50"></i></th>
-                            <th>Current Academic <i class="fas fa-info-circle ml-1 opacity-50"></i></th>
-                            <th>Status</th>
-                            <th class="text-right px-6">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentList">
-                        <!-- Rows rendered by JS -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Grid View (Hidden by default) -->
-            <div id="gridView" class="student-grid hidden">
-                <!-- Cards rendered by JS -->
-            </div>
-            
-            <!-- Empty state -->
-            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center">
-                <i class="fas fa-search text-6xl text-gray-800 mb-6"></i>
-                <h3 class="text-2xl font-bold mb-2">No students found</h3>
-                <p class="text-gray-500">Try adjusting your filters or search query.</p>
-                <button onclick="clearFilters()" class="mt-6 text-indigo-400 font-bold hover:underline">Clear all filters</button>
-            </div>
-        </div>
-        
-        <!-- Pagination -->
-        <div class="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 pb-20">
-            <p id="showingText" class="text-gray-500 text-sm font-medium">Showing 0-0 of 0 students</p>
-            <div id="pagination" class="flex gap-2">
-                <!-- Pagination buttons rendered by JS -->
-            </div>
-        </div>
-    </main>
-
-    <!-- 5. STUDENT DETAIL MODAL -->
-    <div id="studentModal" class="modal-overlay">
-        <div class="modal-content glass mx-auto">
-            <!-- Modal Header -->
-            <div class="p-8 border-b border-indigo-500/10 flex items-start justify-between">
-                <div class="flex items-center gap-6">
-                    <div id="modalAvatar" class="w-20 h-20 rounded-2xl bg-indigo-600 flex items-center justify-center text-3xl font-bold border-4 border-indigo-600/20">JS</div>
-                    <div>
-                        <div class="flex items-center gap-3 mb-1">
-                            <h2 id="modalName" class="text-2xl font-bold">Student Name</h2>
-                            <span id="modalStatus" class="status-pill status-active">Active</span>
-                        </div>
-                        <div class="flex items-center gap-4 text-sm text-gray-400 font-medium">
-                            <span id="modalID" class="bg-gray-800/50 px-3 py-1 rounded-lg text-indigo-400 font-mono">ST123456</span>
-                            <span id="modalDept" class="flex items-center gap-2"><i class="fas fa-building"></i> CS</span>
-                        </div>
-                    </div>
-                </div>
-                <button id="closeModal" class="w-10 h-10 rounded-full hover:bg-gray-800/50 flex items-center justify-center transition-colors">
-                    <i class="fas fa-times text-gray-400"></i>
-                </button>
-            </div>
-            
-            <!-- Modal Sidebar/Tabs -->
-            <div class="p-8">
-                <div class="tabs-header mb-8">
-                    <button class="tab-btn active" data-tab="overview">Overview</button>
-                    <button class="tab-btn" data-tab="semesters">Academic Performance</button>
-                    <button class="tab-btn" data-tab="contact">Contact Details</button>
-                </div>
-                
-                <!-- Tab Panels -->
-                <div id="overviewTab" class="tab-panel space-y-8">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Full Name</span>
-                            <div class="flex items-center justify-between group">
-                                <span id="mDetailedName" class="font-semibold text-gray-200"></span>
-                                <button onclick="copyToClipboard(document.getElementById('mDetailedName').innerText)" class="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-indigo-600/20 text-indigo-400 rounded-md transition-all"><i class="far fa-copy"></i></button>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Gender / Blood Group</span>
-                            <span id="mDetailedInfo" class="font-semibold text-gray-200"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Enrollment Status</span>
-                            <span id="mDetailedStatus" class="font-semibold text-gray-200 capitalise"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Batch / Academic Year</span>
-                            <span id="mDetailedBatch" class="font-semibold text-gray-200"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Current Study</span>
-                            <span id="mDetailedCurrent" class="font-semibold text-gray-200"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Admission / Expected Grad</span>
-                            <span id="mDetailedYears" class="font-semibold text-gray-200"></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="semestersTab" class="tab-panel hidden">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h4 class="font-bold text-gray-200">Semester Timeline</h4>
-                            <p class="text-xs text-gray-500">Track academic progress and GPA history.</p>
-                        </div>
-                        <div class="bg-indigo-600/10 px-4 py-2 rounded-xl border border-indigo-500/20 text-center">
-                            <p class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Overall CGPA</p>
-                            <h3 id="mCGPA" class="text-2xl font-bold text-indigo-100">0.0</h3>
-                        </div>
-                    </div>
-                    
-                    <div id="semTimeline" class="sem-timeline">
-                        <!-- Semesters rendered by JS -->
-                    </div>
-                </div>
-                
-                <div id="contactTab" class="tab-panel hidden space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">University Email</span>
-                            <div class="flex items-center justify-between group">
-                                <span id="mDetailedEmail" class="font-semibold text-gray-200"></span>
-                                <button onclick="copyToClipboard(document.getElementById('mDetailedEmail').innerText)" class="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-indigo-600/20 text-indigo-400 rounded-md transition-all"><i class="far fa-copy"></i></button>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Phone Number</span>
-                            <div class="flex items-center justify-between group">
-                                <span id="mDetailedPhone" class="font-semibold text-gray-200"></span>
-                                <button onclick="copyToClipboard(document.getElementById('mDetailedPhone').innerText)" class="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-indigo-600/20 text-indigo-400 rounded-md transition-all"><i class="far fa-copy"></i></button>
-                            </div>
-                        </div>
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Account Number</span>
-                            <span id="mDetailedAccount" class="font-semibold text-gray-200"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1 block">Address</span>
-                            <span id="mDetailedAddress" class="font-semibold text-gray-200"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="p-8 bg-black/10 border-t border-indigo-500/10 text-right">
-                <button onclick="closeModal()" class="px-6 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-semibold text-sm transition-all">Close Details</button>
-            </div>
-        </div>
+      </div>
     </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:#6EE7B7">
+        <span style="width:7px;height:7px;border-radius:50%;background:#6EE7B7;animation:pulse 2s infinite"></span>
+        Live System
+      </span>
+      <button onclick="toggleTheme()" id="themeBtn" style="background:rgba(255,255,255,0.1);border:none;color:white;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:0.85rem">
+        <i class="fa fa-moon"></i>
+      </button>
+      <a href="/admin" style="background:var(--orange);color:white;padding:8px 18px;border-radius:6px;font-size:0.85rem;font-weight:600;text-decoration:none">
+        <i class="fa fa-lock" style="margin-right:5px"></i>
+        Admin
+      </a>
+    </div>
+  </div>
+</nav>
 
-    <!-- 6. Scripts -->
-    <!-- Essential Libraries -->
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/countup.js@2.6.2/dist/countUp.umd.js"></script>
-    
-    <!-- App Scripts -->
-    <script src="/assets/js/export.js"></script>
-    <script src="/assets/js/main.js"></script>
-    
-    <script>
-        // Init AOS
-        AOS.init({ duration: 800, once: true });
-        
-        // Simple clipboard helper
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text);
-            showToast('Copied to clipboard!', 'info');
-        }
-        
-        function showToast(msg, type='success') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':type==='error'?'fa-exclamation-circle':'fa-info-circle'}"></i> ${msg}`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-    </script>
+<div class="ticker-wrap">
+  <span style="padding:0 24px;font-weight:600">📢 Latest:</span>
+  <span class="ticker">
+    &nbsp;&nbsp;&nbsp;
+    Welcome to Dr. BAMU UniSearch Portal — Official Student Database System
+    &nbsp;|&nbsp;
+    Students can search their academic records including semester-wise performance
+    &nbsp;|&nbsp;
+    NAAC Accredited Grade B++ University
+    &nbsp;|&nbsp;
+    Ranked 46th in State Public Universities (NIRF 2024)
+    &nbsp;|&nbsp;
+    489 Affiliated Colleges | 4.5 Lakh+ Students
+    &nbsp;&nbsp;&nbsp;
+  </span>
+</div>
+
+<div class="hero">
+  <div style="margin-bottom:16px">
+    <span style="background:rgba(255,255,255,0.15);color:white;padding:6px 18px;border-radius:999px;font-size:0.82rem;font-weight:600;border:1px solid rgba(255,255,255,0.2)">
+      🎓 Official Student Information System
+    </span>
+  </div>
+  <h1 style="color:white;font-size:2.8rem;font-weight:800;margin:0 0 10px;line-height:1.15;letter-spacing:-0.03em">
+    Find Any Student <span style="color:var(--orange)">.</span>
+  </h1>
+  <p style="color:rgba(255,255,255,0.8);font-size:1rem;margin:0 0 24px;max-width:500px">
+    Search across all Dr. BAMU departments by name, ID, batch, semester or enrollment status
+  </p>
+  <div class="search-wrapper">
+    <i class="fa fa-search" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);color:#999;font-size:1rem;z-index:1"></i>
+    <input type="text" id="searchInput" class="search-input" placeholder="Search student name, ID, department..." autocomplete="off">
+    <button class="search-btn" onclick="search()">
+      <i class="fa fa-search" style="margin-right:5px"></i> Search
+    </button>
+    <div id="autocompleteDropdown" class="autocomplete-dropdown hidden"></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px">
+    <span onclick="quickSearch('Computer Science')" style="background:rgba(255,255,255,0.15);color:white;padding:4px 14px;border-radius:999px;font-size:0.78rem;cursor:pointer;border:1px solid rgba(255,255,255,0.2)">Computer Science</span>
+    <span onclick="quickSearch('active')" style="background:rgba(255,255,255,0.15);color:white;padding:4px 14px;border-radius:999px;font-size:0.78rem;cursor:pointer;border:1px solid rgba(255,255,255,0.2)">Active Students</span>
+    <span onclick="quickSearch('2021')" style="background:rgba(255,255,255,0.15);color:white;padding:4px 14px;border-radius:999px;font-size:0.78rem;cursor:pointer;border:1px solid rgba(255,255,255,0.2)">Batch 2021</span>
+    <span onclick="quickSearch('MBA')" style="background:rgba(255,255,255,0.15);color:white;padding:4px 14px;border-radius:999px;font-size:0.78rem;cursor:pointer;border:1px solid rgba(255,255,255,0.2)">MBA</span>
+  </div>
+</div>
+
+<div class="stats-strip" style="max-width:1200px;margin:0 auto">
+  <div class="stats-strip-item"><span class="num" id="heroTotal">—</span><span class="lbl">Total Students</span></div>
+  <div class="stats-strip-item"><span class="num" id="heroActive">—</span><span class="lbl">Active Enrolled</span></div>
+  <div class="stats-strip-item"><span class="num" id="heroDepts">—</span><span class="lbl">Departments</span></div>
+  <div class="stats-strip-item"><span class="num" id="heroBatches">—</span><span class="lbl">Active Batches</span></div>
+</div>
+
+<div style="max-width:1200px;margin:24px auto;padding:0 24px">
+  <div class="filter-panel">
+    <div class="filter-heading"><i class="fa fa-filter"></i> Advanced Filters <button id="clearFiltersBtn" onclick="clearFilters()" class="btn btn-sm btn-outline hidden" style="margin-left:auto;font-size:0.72rem">Clear All</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <span class="status-pill active" data-status="" onclick="setStatus(this, '')">All Students</span>
+      <span class="status-pill" data-status="active" onclick="setStatus(this, 'active')"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10B981;margin-right:4px"></span>Active</span>
+      <span class="status-pill" data-status="graduated" onclick="setStatus(this, 'graduated')"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#0055A4;margin-right:4px"></span>Graduated</span>
+      <span class="status-pill" data-status="dropped" onclick="setStatus(this, 'dropped')"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:4px"></span>Dropped</span>
+      <span class="status-pill" data-status="transferred" onclick="setStatus(this, 'transferred')"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#06B6D4;margin-right:4px"></span>Transferred</span>
+      <span class="status-pill" data-status="suspended" onclick="setStatus(this, 'suspended')"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#F59E0B;margin-right:4px"></span>Suspended</span>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+      <div><label style="font-size:0.72rem;font-weight:600;color:var(--text-s);display:block;margin-bottom:4px">DEPARTMENT</label>
+        <select id="deptFilter" onchange="search()" style="height:36px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;background:white;color:var(--text);min-width:160px"><option value="">All Departments</option></select>
+      </div>
+      <div><label style="font-size:0.72rem;font-weight:600;color:var(--text-s);display:block;margin-bottom:4px">ADMISSION YEAR</label>
+        <select id="admYearFilter" onchange="search()" style="height:36px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;background:white;color:var(--text)"><option value="">All Years</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+    <div style="font-size:0.875rem;color:var(--text-s)">Showing <strong id="resultsFrom">0</strong>–<strong id="resultsTo">0</strong> of <strong id="resultsTotal">0</strong> students</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <button id="viewTableBtn" onclick="setView('table')" class="btn btn-icon" style="border-radius:0;border:none;background:var(--navy);color:white"><i class="fa fa-table"></i></button>
+        <button id="viewGridBtn" onclick="setView('grid')" class="btn btn-icon" style="border-radius:0;border:none"><i class="fa fa-grip"></i></button>
+      </div>
+      <div id="exportButtons" style="display:flex;gap:6px">
+        <button onclick="exportPDF()" class="btn btn-sm btn-outline"><i class="fa fa-file-pdf" style="color:var(--danger)"></i> PDF</button>
+        <button onclick="exportExcel()" class="btn btn-sm btn-outline"><i class="fa fa-file-excel" style="color:var(--success)"></i> Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
+    <div id="tableView"><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>#</th><th>Student</th><th>ID</th><th>Department</th><th>Batch</th><th>Academic Year</th><th>Status</th><th>Action</th></tr></thead><tbody id="tableBody"></tbody></table></div></div>
+    <div id="gridView" style="display:none;padding:20px"><div id="gridContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"></div></div>
+  </div>
+
+  <div id="paginationArea" style="display:flex;align-items:center;justify-content:center;margin-top:24px"><div id="pageBtns" style="display:flex;gap:4px"></div></div>
+</div>
+
+<!-- Modal -->
+<div id="studentModal" class="modal-backdrop" style="display:none" onclick="handleBackdropClick(event)">
+  <div class="modal-panel" id="modalPanel">
+    <div class="modal-header" id="modalHeader">
+       <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer"><i class="fa fa-times"></i></button>
+       <div style="display:flex;align-items:center;gap:16px">
+          <div id="modalAvatar" style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:white"></div>
+          <div><div id="modalName" style="font-size:1.3rem;font-weight:700;color:white"></div><div id="modalMeta" style="margin-top:4px"></div></div>
+       </div>
+    </div>
+    <div class="tab-bar">
+       <button class="tab-btn active" onclick="setTab('overview')">Overview</button>
+       <button class="tab-btn" onclick="setTab('semesters')">Semesters</button>
+       <button class="tab-btn" onclick="setTab('contact')">Contact</button>
+    </div>
+    <div style="padding:24px"><div id="tabOverview"></div><div id="tabSemesters" style="display:none"></div><div id="tabContact" style="display:none"></div></div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><img src="http://bamu.ac.in/images/logo.png" style="height:40px;filter:brightness(0) invert(1)"><div><div style="font-weight:700;color:white;font-size:0.95rem">UniSearch</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.5)">Student Information Portal</div></div></div>
+      <p style="font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.7;max-width:320px">Official student database system of Dr. Babasaheb Ambedkar Marathwada University, Chhatrapati Sambhajinagar, Maharashtra.</p>
+    </div>
+    <div>
+      <div style="font-weight:700;color:white;margin-bottom:10px;font-size:0.85rem">Quick Links</div>
+      <div style="display:flex;flex-direction:column;gap:6px"><a href="http://bamu.ac.in" style="color:rgba(255,255,255,0.6);font-size:0.82rem">BAMU Official Website</a><a href="https://bamua.digitaluniversity.ac" style="color:rgba(255,255,255,0.6);font-size:0.82rem">Examination Portal</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2025 Dr. Babasaheb Ambedkar Marathwada University. UniSearch Student Portal.</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="/assets/js/main.js"></script>
+<script src="/assets/js/export.js"></script>
 </body>
 </html>

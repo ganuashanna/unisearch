@@ -1,153 +1,168 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login | UniSearch</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | UniSearch Dr. BAMU</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body class="bg-[#07070F] text-[#F0F0FF]">
-    <div class="min-h-screen lg:flex">
-        <!-- LEFT (hidden on mobile) -->
-        <div class="hidden lg:flex lg:w-1/2 bg-[#0A0A1F] relative flex-col justify-center px-16 overflow-hidden">
-            <!-- Animated background elements -->
-            <div class="absolute top-0 left-0 w-full h-full opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.2),transparent_50%)]"></div>
-            <div class="absolute -top-24 -left-24 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full"></div>
-            <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-cyan-600/10 blur-[100px] rounded-full"></div>
-            
-            <div class="relative z-10 w-full max-w-lg">
-                <div class="flex items-center gap-4 mb-10">
-                    <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-bold shadow-2xl shadow-indigo-600/40">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-4xl font-bold tracking-tight">UniSearch</h1>
-                        <p class="text-xs text-indigo-400 font-bold uppercase tracking-[0.2em] leading-none">Administrator Gateway</p>
-                    </div>
-                </div>
-                
-                <h2 class="text-5xl font-extrabold tracking-tight mb-8 leading-tight">
-                    Manage your <br>
-                    university <span class="gradient-text">database.</span>
-                </h2>
-                <p class="text-gray-400 text-lg mb-12">
-                    Access the central management system to import records, 
-                    track student academic performance, and manage site configurations.
-                </p>
-                
-                <!-- Floating stats cards -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="glass p-5 rounded-2xl border-indigo-500/10" data-aos="fade-right">
-                        <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Users</p>
-                        <h3 class="text-2xl font-bold">1,204</h3>
-                    </div>
-                    <div class="glass p-5 rounded-2xl border-indigo-500/10" data-aos="fade-right" data-aos-delay="100">
-                        <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">System Health</p>
-                        <h3 class="text-2xl font-bold text-emerald-500">99.9%</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
+<body class="bg-gray-100">
 
-        <!-- RIGHT -->
-        <div class="flex-1 flex flex-col items-center justify-center p-8">
-            <div class="w-full max-w-md">
-                <div class="lg:hidden flex justify-center mb-12">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-xl shadow-indigo-600/20">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <h1 class="text-2xl font-bold tracking-tight">UniSearch</h1>
-                    </div>
-                </div>
-                
-                <div class="glass p-10 rounded-3xl border-indigo-500/20 shadow-2xl">
-                    <div class="w-16 h-16 rounded-2xl bg-indigo-600/10 flex items-center justify-center text-indigo-400 mb-8 mx-auto border border-indigo-500/10 shadow-inner">
-                        <i class="fas fa-lock text-2xl"></i>
-                    </div>
-                    
-                    <h2 class="text-2xl font-bold text-center mb-2">Admin Portal</h2>
-                    <p class="text-gray-400 text-sm text-center mb-10">Sign in to manage students</p>
-                    
-                    <form id="loginForm" class="space-y-6">
-                        <div>
-                            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Password</label>
-                            <div class="relative">
-                                <input type="password" id="password" required
-                                       class="w-full bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all placeholder:text-gray-700"
-                                       placeholder="••••••••••••">
-                                <button type="button" id="togglePass" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-indigo-400 transition-colors">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" id="loginBtn" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center">
-                            Sign In
-                        </button>
-                    </form>
-                    
-                    <div id="error" class="hidden mt-6 text-center text-rose-500 text-sm font-medium animate-bounce">
-                        <i class="fas fa-exclamation-circle mr-2"></i> Invalid password. Please try again.
-                    </div>
-                </div>
-                
-                <p class="text-center mt-10">
-                    <a href="/" class="text-gray-500 text-sm hover:text-indigo-400 transition-colors font-medium">
-                        <i class="fas fa-arrow-left mr-2"></i> Back to search
-                    </a>
-                </p>
+<div class="min-h-screen flex flex-col md:flex-row shadow-2xl overflow-hidden">
+    <!-- Left: Branding -->
+    <div class="md:w-1/2 relative bg-navy overflow-hidden flex flex-col items-center justify-center p-12 text-center text-white">
+        <div class="absolute inset-0 z-0 bg-cover bg-center opacity-25" 
+             style="background-image: url('http://bamu.ac.in/media/az4hc0v4/main.jpg');">
+        </div>
+        <div class="absolute inset-0 z-10 bg-navy opacity-80"></div>
+        
+        <div class="relative z-20 space-y-8 max-w-lg">
+            <img src="http://bamu.ac.in/images/logo.png" alt="BAMU Logo" class="h-24 mx-auto mb-4 filter brightness-125">
+            <h2 class="text-2xl font-black leading-tight uppercase tracking-widest">
+                Dr. Babasaheb Ambedkar Marathwada University
+            </h2>
+            <p class="text-gray-300 font-medium">Chhatrapati Sambhajinagar, Maharashtra</p>
+            
+            <!-- VC Photo -->
+            <div class="mt-8">
+                <img src="http://bamu.ac.in/media/ndzl503s/vijayfulari.jpg" 
+                     class="h-32 w-32 rounded-full border-4 border-orange mx-auto shadow-2xl object-cover" 
+                     alt="Vice Chancellor">
+                <p class="mt-4 font-bold text-sm">Prof. (Dr.) Vijay Fulari</p>
+                <p class="text-xs text-orange font-bold uppercase tracking-wider">Vice Chancellor</p>
+            </div>
+            
+            <div class="flex justify-center gap-6 mt-12 bg-white/10 p-4 rounded-xl backdrop-blur-md">
+                <img src="http://bamu.ac.in/media/t5ekvhml/naac-grade-2024.png" class="h-14" alt="NAAC">
+                <img src="http://bamu.ac.in/media/a0hdq5b3/nirf-ranking_1_1_1.png" class="h-14" alt="NIRF">
             </div>
         </div>
     </div>
 
-    <script>
-        // Check if already logged in
-        if (localStorage.getItem('uni_admin_token')) {
-            window.location.href = '/dashboard';
-        }
+    <!-- Right: Login Form -->
+    <div class="md:w-1/2 bg-white flex items-center justify-center p-12">
+        <div id="loginCard" class="w-full max-w-sm space-y-8 animate-fade-in">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-50 text-navy rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+                    <i class="fa fa-lock"></i>
+                </div>
+                <h1 class="text-3xl font-black text-navy">Admin Portal</h1>
+                <p class="text-gray-500 font-medium mt-1">UniSearch Administration System</p>
+            </div>
 
-        const form = document.getElementById('loginForm');
-        const passInput = document.getElementById('password');
-        const loginBtn = document.getElementById('loginBtn');
-        const errorDiv = document.getElementById('error');
-        const togglePass = document.getElementById('togglePass');
+            <div class="space-y-6">
+                <div>
+                   <label class="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2">Admin Password</label>
+                   <div class="relative">
+                      <input type="password" id="passwordInput" 
+                        class="w-full h-14 bg-gray-50 border-2 border-gray-100 rounded-xl px-5 text-navy font-bold focus:border-orange focus:bg-white outline-none transition-all pr-12"
+                        placeholder="••••••••">
+                      <button onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-navy transition-colors">
+                        <i id="eyeIcon" class="fa fa-eye"></i>
+                      </button>
+                   </div>
+                </div>
 
-        togglePass.onclick = () => {
-            const type = passInput.type === 'password' ? 'text' : 'password';
-            passInput.type = type;
-            togglePass.innerHTML = `<i class="fas fa-eye${type === 'password' ? '' : '-slash'}"></i>`;
-        };
+                <div id="loginError" class="hidden p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-3">
+                   <i class="fa fa-exclamation-circle"></i>
+                   <span id="loginErrorMsg">Invalid password. Please try again.</span>
+                </div>
 
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            errorDiv.classList.add('hidden');
-            loginBtn.disabled = true;
-            loginBtn.innerHTML = '<div class="spinner"></div>';
+                <button id="loginBtn" onclick="doLogin()" 
+                    class="w-full h-14 bg-navy text-white rounded-xl font-bold hover:bg-orange transition-all shadow-xl shadow-navy/20 flex items-center justify-center gap-3">
+                    <i class="fa fa-sign-in-alt"></i> Sign In
+                </button>
+            </div>
 
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: passInput.value })
-                });
-                const data = await res.json();
+            <div class="text-center">
+                <a href="/" class="text-sm font-bold text-navy hover:text-orange transition-colors">
+                    <i class="fa fa-arrow-left mr-2"></i> Back to Main Search
+                </a>
+            </div>
+            
+            <p class="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest pt-12 border-t border-gray-100">
+                © Dr. BAMU UniSearch • System V2.0
+            </p>
+        </div>
+    </div>
+</div>
 
-                if (data.success) {
-                    localStorage.setItem('uni_admin_token', data.token);
-                    window.location.href = '/dashboard';
-                } else {
-                    throw new Error(data.error);
-                }
-            } catch (err) {
-                errorDiv.classList.remove('hidden');
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.innerHTML = 'Sign In';
-            }
-        };
-    </script>
+<script>
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  const msg = document.getElementById('loginErrorMsg');
+  const pwd = document.getElementById('passwordInput').value.trim();
+
+  if (!pwd) {
+    showError('Please enter the password');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Signing in...';
+  err.className = 'hidden';
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.token) {
+      localStorage.setItem('uni_admin_token', data.token);
+      window.location.href = '/dashboard';
+    } else {
+      showError(data.error || 'Invalid password');
+      const card = document.getElementById('loginCard');
+      card.classList.add('animate-shake');
+      setTimeout(() => card.classList.remove('animate-shake'), 400);
+    }
+  } catch (e) {
+    showError('Connection error. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Sign In';
+  }
+}
+
+function showError(m) {
+  const err = document.getElementById('loginError');
+  const msg = document.getElementById('loginErrorMsg');
+  msg.textContent = m;
+  err.className = 'p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-3 animate-fade-in';
+}
+
+function togglePassword() {
+  const input = document.getElementById('passwordInput');
+  const icon  = document.getElementById('eyeIcon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fa fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fa fa-eye';
+  }
+}
+
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+
+<style>
+@keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fade-in { animation: fade-in 0.4s ease forwards; }
+
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25%, 75% { transform: translateX(-8px); } 50% { transform: translateX(8px); } }
+.animate-shake { animation: shake 0.4s ease; }
+</style>
+
 </body>
 </html>
