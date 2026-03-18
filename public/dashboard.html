@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | UniSearch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    
+    <script>
+        // Auth check
+        if (!localStorage.getItem('uni_admin_token')) {
+            window.location.href = '/admin';
+        }
+    </script>
+</head>
+<body class="bg-[#07070F] text-[#F0F0FF]">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass border-r border-indigo-500/10">
+        <div class="p-8 pb-10 border-b border-indigo-500/10 mb-8">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-tight">UniSearch</h1>
+                    <p class="text-[9px] text-indigo-400 font-bold uppercase tracking-widest">Admin Panel</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="flex-1 flex flex-col gap-2">
+            <a href="#overview" class="nav-item active" data-nav="overview">
+                <i class="fas fa-chart-pie"></i>
+                <span>Overview</span>
+            </a>
+            <a href="#import" class="nav-item" data-nav="import">
+                <i class="fas fa-file-upload"></i>
+                <span>Import Data</span>
+            </a>
+            <a href="#students" class="nav-item" data-nav="students">
+                <i class="fas fa-users"></i>
+                <span>Students</span>
+            </a>
+            <a href="#semesters" class="nav-item" data-nav="semesters">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Semesters</span>
+            </a>
+            
+            <div class="mt-8 pt-8 border-t border-indigo-500/10">
+                <a href="/" class="nav-item">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Public Search</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="p-8 border-t border-indigo-500/10">
+            <button id="logoutBtn" class="flex items-center gap-4 text-xs font-bold text-rose-500 hover:text-rose-400 transition-colors">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- Dashboard Header -->
+        <header class="flex items-center justify-between mb-12">
+            <div>
+                <h1 id="pageTitle" class="text-3xl font-bold tracking-tight mb-1">System Overview</h1>
+                <p id="pageSubtitle" class="text-gray-500 text-sm font-medium">Real-time statistics and analytics for the current portal.</p>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-gray-400">Welcome, Administrator</p>
+                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest animate-pulse">System Online</p>
+                    </div>
+                    <div class="w-12 h-12 bg-indigo-600 rounded-full border-4 border-indigo-600/20 flex items-center justify-center text-xl font-bold">AD</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- A) OVERVIEW SECTION -->
+        <div id="sectionOverview" class="section-panel space-y-10">
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="stat-card">
+                    <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Students</p>
+                    <h3 id="dStatTotal" class="text-4xl font-extrabold text-white">1,204</h3>
+                    <div class="mt-4 flex items-center gap-2 text-[11px] font-semibold text-emerald-500">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>System Total Records</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Active Enrolled</p>
+                    <h3 id="dStatActive" class="text-4xl font-extrabold text-emerald-500">842</h3>
+                    <div class="mt-4 flex items-center gap-2 text-[11px] font-semibold text-gray-500">
+                        <span>Currently studying</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Graduated</p>
+                    <h3 id="dStatGrad" class="text-4xl font-extrabold text-indigo-400">312</h3>
+                    <div class="mt-4 flex items-center gap-2 text-[11px] font-semibold text-gray-500">
+                        <span>Degree completed</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Departments</p>
+                    <h3 id="dStatDepts" class="text-4xl font-extrabold text-cyan-400">10</h3>
+                    <div class="mt-4 flex items-center gap-2 text-[11px] font-semibold text-gray-500">
+                        <span>Across institution</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Batch Breakdown -->
+                <div class="glass p-8 rounded-3xl border-indigo-500/10">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h4 class="font-bold">Batch Breakdown</h4>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Students per admission year</p>
+                        </div>
+                        <i class="fas fa-chart-bar text-indigo-400/30 text-2xl"></i>
+                    </div>
+                    
+                    <div id="batchChart" class="bar-chart">
+                        <!-- Bars by JS -->
+                    </div>
+                </div>
+                
+                <!-- Performance / CGPA -->
+                <div class="glass p-8 rounded-3xl border-indigo-500/10">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h4 class="font-bold">Average Performance</h4>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Average CGPA per batch</p>
+                        </div>
+                        <i class="fas fa-star text-amber-500/30 text-2xl"></i>
+                    </div>
+                    
+                    <div id="perfChart" class="bar-chart">
+                        <!-- Bars by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- B) IMPORT SECTION -->
+        <div id="sectionImport" class="section-panel hidden space-y-8">
+            <div class="glass p-10 rounded-3xl border-indigo-500/10 text-center">
+                <div id="dropZone" class="upload-zone mb-6">
+                    <div class="w-20 h-20 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-3xl text-indigo-400 mx-auto mb-6">
+                        <i class="fas fa-cloud-upload-alt animate-bounce"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Import Student Records</h3>
+                    <p class="text-gray-500 mb-6 text-sm">Drag and drop your Excel or CSV file here to bulk upload students.</p>
+                    
+                    <div class="flex items-center justify-center gap-3 mb-8">
+                        <span class="px-3 py-1.5 bg-indigo-600/5 text-indigo-400 text-[10px] font-bold border border-indigo-500/20 rounded-lg">XLSX</span>
+                        <span class="px-3 py-1.5 bg-indigo-600/5 text-indigo-400 text-[10px] font-bold border border-indigo-500/20 rounded-lg">XLS</span>
+                        <span class="px-3 py-1.5 bg-indigo-600/5 text-indigo-400 text-[10px] font-bold border border-indigo-500/20 rounded-lg">CSV</span>
+                    </div>
+                    
+                    <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls, .csv">
+                    <button id="browseBtn" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20">
+                        Browse Files
+                    </button>
+                    <p class="mt-4 text-[11px] text-gray-600 font-medium">Maximum file size: 10MB</p>
+                </div>
+                
+                <button id="downloadTemplate" class="text-indigo-400 font-bold text-xs hover:underline">
+                    <i class="fas fa-download mr-2"></i> Download Import Template (.xlsx)
+                </button>
+            </div>
+            
+            <!-- File Preview Area (Hidden by default) -->
+            <div id="previewArea" class="glass p-8 rounded-3xl border-indigo-500/10 hidden">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-indigo-600/10 rounded-xl flex items-center justify-center text-indigo-400 text-xl font-bold">
+                            <i id="previewIcon" class="fas fa-file-excel"></i>
+                        </div>
+                        <div>
+                            <h4 id="fileNameLabel" class="font-bold">students_batch_2024.xlsx</h4>
+                            <p id="fileSizeLabel" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">124 KB · 150 rows found</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button id="cancelBtn" class="px-6 py-2 bg-gray-800 text-white rounded-xl font-bold text-xs">Cancel</button>
+                        <button id="importNowBtn" class="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-lg shadow-indigo-600/20">Import Students →</button>
+                    </div>
+                </div>
+                
+                <!-- Import Progress (Hidden) -->
+                <div id="importProgress" class="hidden my-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-gray-400">Importing Records...</span>
+                        <span id="percentLabel" class="text-xs font-bold text-indigo-400">45%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 45%;"></div>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto rounded-xl border border-indigo-500/10">
+                    <table class="data-table">
+                        <thead id="previewHeaders"></thead>
+                        <tbody id="previewRows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- C) STUDENTS SECTION -->
+        <div id="sectionStudents" class="section-panel hidden">
+            <div class="glass p-8 rounded-3xl border-indigo-500/10 text-center bg-indigo-600/5">
+                <i class="fas fa-tools text-6xl text-gray-800 mb-6"></i>
+                <h3 class="text-2xl font-bold mb-2">Student Management</h3>
+                <p class="text-gray-500 mb-8 max-w-md mx-auto">Use the public search portal to find and view students. This administrative view allows advanced record deletion and global edits.</p>
+                <a href="/" class="btn-glow inline-block">Go to Student List</a>
+            </div>
+        </div>
+        
+        <!-- D) SEMESTERS SECTION -->
+        <div id="sectionSemesters" class="section-panel hidden space-y-8">
+             <div class="glass p-8 rounded-3xl border-indigo-500/10">
+                <h4 class="font-bold mb-6">Post Semester Results</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                    <div>
+                        <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Search Student (Name or ID)</label>
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-600"></i>
+                            <input type="text" id="semStudentSearch" class="w-full bg-indigo-600/5 border border-indigo-500/20 rounded-xl pl-12 pr-4 py-3 text-sm focus:border-indigo-500 outline-none" placeholder="Search to start...">
+                            <div id="semAutocomplete" class="absolute top-full left-0 right-0 mt-2 glass rounded-2xl hidden z-40 p-2 overflow-hidden border-indigo-500/10 shadow-2xl">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="semActiveStudent" class="hidden mt-12 p-8 border-t border-indigo-500/10 animate-fade-in">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center gap-4">
+                            <div id="semSAvatar" class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-xl">JD</div>
+                            <div>
+                                <h4 id="semSName" class="font-bold text-lg">John Doe</h4>
+                                <p id="semSID" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">ST-123456</p>
+                            </div>
+                        </div>
+                        <button id="addSemBtn" class="px-6 py-2 bg-indigo-600/10 border border-indigo-500/20 rounded-xl text-xs font-bold text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all">
+                            + Add New Semester Result
+                        </button>
+                    </div>
+                    
+                    <div id="studentSemsGrid" class="sem-timeline">
+                        <!-- Student semesters here -->
+                    </div>
+                </div>
+             </div>
+        </div>
+    </main>
+
+    <!-- Modal for Adding Semester (Hidden) -->
+    <div id="addSemModal" class="modal-overlay">
+        <div class="modal-content glass mx-auto max-w-xl">
+             <div class="p-8 border-b border-indigo-500/10 flex items-center justify-between">
+                <h2 class="text-xl font-bold">Add Semester Result</h2>
+                <button id="closeSemModal" class="text-gray-500 hover:text-gray-300 transition-colors"><i class="fas fa-times"></i></button>
+             </div>
+             
+             <form id="semForm" class="p-8 space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Semester Number</label>
+                        <input type="number" id="semNum" name="semester_number" min="1" max="12" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm outline-none" required>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Academic Year</label>
+                        <input type="text" id="semAY" name="academic_year" placeholder="e.g. 2023-24" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm outline-none" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">SGPA</label>
+                        <input type="number" step="0.01" id="semSGPA" name="sgpa" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm outline-none" required>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">CGPA</label>
+                        <input type="number" step="0.01" id="semCGPA" name="cgpa" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm outline-none" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Attendance %</label>
+                        <input type="number" step="0.1" id="semAtt" name="attendance_pct" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm outline-none">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Result Status</label>
+                        <select id="semResult" name="result" class="bg-indigo-600/5 border border-indigo-500/20 rounded-xl px-4 py-3 text-sm outline-none">
+                            <option value="pending">Pending</option>
+                            <option value="pass">Pass</option>
+                            <option value="fail">Fail</option>
+                            <option value="backlog">Backlog</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <button type="submit" class="btn-glow px-10">Save Result</button>
+                </div>
+             </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/countup.js@2.6.2/dist/countUp.umd.js"></script>
+    <script src="/assets/js/admin.js"></script>
+</body>
+</html>

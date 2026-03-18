@@ -1,0 +1,27 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel
+.vercel_build_output
+
+# Dependencies
+node_modules/
+vendor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / Output
+coverage/
+dist/
+public/assets/js/UniSearch_Import_Template.xlsx
+*.log
