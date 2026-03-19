@@ -239,7 +239,7 @@ export default async function handler(req, res) {
       'phone_number', 'department_name',
       'enrollment_status', 'gender', 'blood_group',
       'date_of_birth', 'address', 'account_number',
-      'guardian_name', 'guardian_phone', 'photo_url'
+      'guardian_name', 'guardian_phone'
     ];
     for (const f of strFields) {
       const val = raw2[f];
