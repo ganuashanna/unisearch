@@ -1,108 +1,60 @@
-import {
-  supabaseRequest, setCors, addComputedFields
-} from './_supabase.js';
-
-function escapeValue(value) {
-  return encodeURIComponent(String(value).trim());
-}
-
-function decorateStudent(student) {
-  const sems = Array.isArray(student.semesters) ? student.semesters : [];
-  if (sems.length) {
-    const latest = [...sems].sort((a, b) => {
-      return (a.semester_number || 0) - (b.semester_number || 0);
-    }).at(-1);
-    student.latest_cgpa = latest?.cgpa ?? null;
-    student.latest_sgpa = latest?.sgpa ?? null;
-  } else {
-    student.latest_cgpa = null;
-    student.latest_sgpa = null;
-  }
-  return addComputedFields(student);
-}
+import { supabaseRequest, addComputedFields } from './_supabase.js';
 
 export default async function handler(req, res) {
-  setCors(res);
-  if (req.method === 'OPTIONS')
-    return res.status(200).end();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Content-Type', 'application/json');
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const q = (url.searchParams.get('q') || '').trim();
-  const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
-  const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') || '25', 10)));
+  const q       = req.query.q || '';
+  const dept    = req.query.department_name || req.query.department_id || '';
+  const admYear = req.query.admission_year || '';
+  const curYear = req.query.current_year || '';
+  const status  = req.query.enrollment_status || '';
+  const gender  = req.query.gender || '';
+  const page    = Math.max(1, parseInt(req.query.page) || 1);
+  const limit   = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
+  const sortBy  = ['full_name','student_id','admission_year','created_at']
+    .includes(req.query.sort_by) ? req.query.sort_by : 'full_name';
+  const sortDir = req.query.sort_dir === 'desc' ? 'desc' : 'asc';
+
+  let qs = 'select=*';
+
+  // Build filters
   const filters = [];
-
   if (q) {
-    const search = escapeValue(`%${q}%`);
-    filters.push(
-      `or=(full_name.ilike.${search},student_id.ilike.${search},email.ilike.${search},department_name.ilike.${search},phone_number.ilike.${search})`
-    );
+    const s = encodeURIComponent(`%${q}%`);
+    filters.push(`or=(full_name.ilike.${s},student_id.ilike.${s},email.ilike.${s},department_name.ilike.${s},phone_number.ilike.${s})`);
   }
+  if (dept)    filters.push(`department_name=ilike.${encodeURIComponent('%'+dept+'%')}`);
+  if (admYear) filters.push(`admission_year=eq.${admYear}`);
+  if (curYear) filters.push(`current_year=eq.${curYear}`);
+  if (status)  filters.push(`enrollment_status=eq.${status}`);
+  if (gender)  filters.push(`gender=eq.${gender}`);
 
-  const enrollmentStatus = url.searchParams.get('enrollment_status') || '';
-  if (enrollmentStatus) {
-    filters.push(`enrollment_status=eq.${escapeValue(enrollmentStatus)}`);
-  }
-
-  const departmentFilter = (url.searchParams.get('department_id') || '').trim();
-  if (departmentFilter) {
-    if (/^\d+$/.test(departmentFilter)) {
-      filters.push(`department_id=eq.${departmentFilter}`);
-    } else {
-      filters.push(`department_name=eq.${escapeValue(departmentFilter)}`);
-    }
-  }
-
-  const admissionYear = (url.searchParams.get('admission_year') || '').trim();
-  if (admissionYear) {
-    filters.push(`admission_year=eq.${admissionYear}`);
-  }
-
-  const currentYear = (url.searchParams.get('current_year') || '').trim();
-  if (currentYear) {
-    filters.push(`current_year=eq.${currentYear}`);
-  }
-
-  const gender = (url.searchParams.get('gender') || '').trim();
-  if (gender) {
-    const genderMap = { M: 'Male', F: 'Female', O: 'Other' };
-    filters.push(`gender=eq.${escapeValue(genderMap[gender] || gender)}`);
-  }
-
-  const allowed = ['full_name', 'student_id', 'admission_year', 'current_year', 'department_name', 'created_at', 'enrollment_status'];
-  const sortBy = allowed.includes(url.searchParams.get('sort_by')) ? url.searchParams.get('sort_by') : 'full_name';
-  const sortDir = url.searchParams.get('sort_dir') === 'desc' ? 'desc' : 'asc';
-
-  const rangeStart = (page - 1) * limit;
-  const rangeEnd = rangeStart + limit - 1;
-  let qs = 'select=*,semesters(semester_number,academic_year,sgpa,cgpa,attendance_pct,result,backlogs)';
-  if (filters.length) qs += `&${filters.join('&')}`;
+  if (filters.length) qs += '&' + filters.join('&');
   qs += `&order=${sortBy}.${sortDir}`;
 
+  const from = (page - 1) * limit;
+  const to   = from + limit - 1;
+
+  // Get paginated data
   const result = await supabaseRequest(
-    'GET',
-    `/rest/v1/students?${qs}`,
-    null,
-    false,
-    { Range: `${rangeStart}-${rangeEnd}`, Prefer: 'count=exact' }
+    'GET', `/rest/v1/students?${qs}`,
+    null, false,
+    { 'Range': `${from}-${to}`, 'Prefer': 'count=exact' }
   );
 
-  const totalRes = await supabaseRequest(
-    'GET',
-    `/rest/v1/students?select=id${filters.length ? `&${filters.join('&')}` : ''}`,
-    null,
-    false
+  // Get total count
+  const countResult = await supabaseRequest(
+    'GET', `/rest/v1/students?${qs}&select=id`,
+    null, false
   );
 
-  const rows = Array.isArray(result.data) ? result.data : [];
-  const total = Array.isArray(totalRes.data) ? totalRes.data.length : 0;
-  const data = rows.map(decorateStudent);
+  const data  = Array.isArray(result.data) ? result.data.map(addComputedFields) : [];
+  const total = Array.isArray(countResult.data) ? countResult.data.length : 0;
 
-  return res.status(200).json({
-    data,
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
+  res.status(200).json({
+    data, total, page, limit,
+    totalPages: Math.ceil(total / limit) || 1,
   });
 }
