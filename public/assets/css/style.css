@@ -577,3 +577,27 @@ body.dark .status-pill.active {
   color: #1A1A2E !important;
   background: #FFFFFF !important;
 }
+/* Fix first row hidden behind header */
+.data-table tbody tr:first-child td {
+  padding-top: 14px !important;
+}
+table.data-table {
+  border-collapse: collapse !important;
+}
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+/* Fix table container overflow */
+#tableView {
+  overflow-x: auto;
+  overflow-y: visible !important;
+}
+#tableView > div {
+  overflow: visible !important;
+}
+/* Remove any negative margin on first row */
+.data-table tbody tr:first-child {
+  margin-top: 0 !important;
+}
