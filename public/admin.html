@@ -91,68 +91,68 @@
 </div>
 
 <script>
+// Auth guard - if already logged in, go to dashboard
+if (localStorage.getItem('uni_admin_token')) {
+  window.location.href = '/dashboard';
+}
+
 async function doLogin() {
   const btn = document.getElementById('loginBtn');
   const err = document.getElementById('loginError');
-  const msg = document.getElementById('loginErrorMsg');
   const pwd = document.getElementById('passwordInput').value.trim();
 
-  if (!pwd) {
-    showError('Please enter the password');
-    return;
-  }
+  if (!pwd) { showError('Please enter your password'); return; }
 
   btn.disabled = true;
   btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Signing in...';
-  err.className = 'hidden';
+  if (err) err.style.display = 'none';
 
   try {
-    const res = await fetch('/api/login', {
+    const response = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: pwd })
     });
 
-    const data = await res.json();
+    const text = await response.text();
+    let data = {};
+    try { data = JSON.parse(text); } catch(e) { data = { error: text }; }
 
-    if (res.ok && data.token) {
+    if (response.ok && data.token) {
       localStorage.setItem('uni_admin_token', data.token);
       window.location.href = '/dashboard';
     } else {
-      showError(data.error || 'Invalid password');
+      showError(data.error || 'Login failed. Check password.');
       const card = document.getElementById('loginCard');
-      card.classList.add('animate-shake');
-      setTimeout(() => card.classList.remove('animate-shake'), 400);
+      if (card) {
+        card.style.animation = 'shake 0.4s ease';
+        setTimeout(() => card.style.animation = '', 500);
+      }
     }
-  } catch (e) {
-    showError('Connection error. Please try again.');
+  } catch(e) {
+    showError('Network error: ' + e.message);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Sign In';
   }
 }
 
-function showError(m) {
+function showError(msg) {
   const err = document.getElementById('loginError');
-  const msg = document.getElementById('loginErrorMsg');
-  msg.textContent = m;
-  err.className = 'p-4 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-3 animate-fade-in';
+  if (err) { err.textContent = msg; err.style.display = 'block'; }
 }
 
 function togglePassword() {
-  const input = document.getElementById('passwordInput');
-  const icon  = document.getElementById('eyeIcon');
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.className = 'fa fa-eye-slash';
-  } else {
-    input.type = 'password';
-    icon.className = 'fa fa-eye';
-  }
+  const inp  = document.getElementById('passwordInput');
+  const icon = document.getElementById('eyeIcon');
+  if (!inp) return;
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  if (icon) icon.className = inp.type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
 }
 
-document.getElementById('passwordInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('passwordInput');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 });
 </script>
 
