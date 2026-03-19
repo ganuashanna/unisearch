@@ -1,28 +1,24 @@
 {
   "version": 2,
+  "builds": [
+    { "src": "api/*.js",   "use": "@vercel/node"   },
+    { "src": "public/**",  "use": "@vercel/static" }
+  ],
   "routes": [
-    { "src": "/api/test",         "dest": "/api/test.js" },
-    { "src": "/api/search",       "dest": "/api/search.js" },
+    { "src": "/api/test",         "dest": "/api/test.js"         },
+    { "src": "/api/search",       "dest": "/api/search.js"       },
     { "src": "/api/autocomplete", "dest": "/api/autocomplete.js" },
-    { "src": "/api/student",      "dest": "/api/student.js" },
-    { "src": "/api/departments",  "dest": "/api/departments.js" },
-    { "src": "/api/stats",        "dest": "/api/stats.js" },
-    { "src": "/api/export",       "dest": "/api/export.js" },
-    { "src": "/api/upload",       "dest": "/api/upload.js" },
-    { "src": "/api/login",        "dest": "/api/login.js" },
-    { "src": "/api/logout",       "dest": "/api/logout.js" },
-    { "src": "/api/seed",         "dest": "/api/seed.js" },
-    {
-      "src": "/admin",
-      "headers": { "Cache-Control": "no-cache" },
-      "dest": "/public/admin.html"
-    },
-    {
-      "src": "/dashboard",
-      "headers": { "Cache-Control": "no-cache" },
-      "dest": "/public/dashboard.html"
-    },
-    { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
-    { "src": "/(.*)", "dest": "/public/index.html" }
+    { "src": "/api/student",      "dest": "/api/student.js"      },
+    { "src": "/api/departments",  "dest": "/api/departments.js"  },
+    { "src": "/api/stats",        "dest": "/api/stats.js"        },
+    { "src": "/api/export",       "dest": "/api/export.js"       },
+    { "src": "/api/upload",       "dest": "/api/upload.js"       },
+    { "src": "/api/login",        "dest": "/api/login.js"        },
+    { "src": "/api/logout",       "dest": "/api/logout.js"       },
+    { "src": "/api/seed",         "dest": "/api/seed.js"         },
+    { "src": "/admin",            "dest": "/public/admin.html"   },
+    { "src": "/dashboard",        "dest": "/public/dashboard.html" },
+    { "src": "/assets/(.*)",      "dest": "/public/assets/$1"    },
+    { "src": "/(.*)",             "dest": "/public/index.html"   }
   ]
 }
