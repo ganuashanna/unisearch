@@ -174,7 +174,7 @@ export default async function handler(req, res) {
     'phone_number', 'address', 'account_number',
     'department_name', 'admission_year', 'graduation_year',
     'current_year', 'current_semester', 'enrollment_status',
-    'date_of_birth', 'photo_url', 'gender',
+    'date_of_birth', 'gender',
     'blood_group', 'guardian_name', 'guardian_phone'
   ]);
 
