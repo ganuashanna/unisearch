@@ -601,3 +601,13 @@ table.data-table {
 .data-table tbody tr:first-child {
   margin-top: 0 !important;
 }
+/* Fix row #1 hidden behind floating header */
+.data-table { border-collapse: collapse !important; }
+.data-table thead th { position: static !important; }
+#tableView { overflow: visible !important; }
+#tableView > div { overflow-x: auto; }
+
+/* Fix table container not clipping top row */
+.data-table tbody tr:first-child td {
+  border-top: 1px solid var(--border) !important;
+}
