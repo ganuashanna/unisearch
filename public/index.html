@@ -4,230 +4,1081 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UniSearch | Dr. BAMU Student Database</title>
-  <meta name="description" content="Official student search portal of Dr. Babasaheb Ambedkar Marathwada University">
-  <!-- Fonts -->
+  <meta name="description" content="Official student search portal of Dr. Babasaheb Ambedkar Marathwada University, Chhatrapati Sambhajinagar">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Custom CSS -->
   <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #F0F4FF; margin: 0; }
+
+    /* Top govt bar */
+    .top-bar {
+      background: #001F5B;
+      color: rgba(255,255,255,0.65);
+      font-size: 0.72rem;
+      padding: 5px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .top-bar a { color: rgba(255,255,255,0.5); text-decoration: none; }
+    .top-bar a:hover { color: white; }
+
+    /* Navbar */
+    .navbar {
+      background: #003087;
+      border-bottom: 3px solid #F47920;
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .navbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Ticker */
+    .ticker-wrap {
+      background: #F47920;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 6px 0;
+      font-size: 0.78rem;
+      color: white;
+      font-weight: 600;
+    }
+    .ticker-inner {
+      display: inline-block;
+      animation: ticker 40s linear infinite;
+    }
+    @keyframes ticker {
+      0%   { transform: translateX(100vw); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 340px;
+      background:
+        linear-gradient(135deg,
+          rgba(0,48,135,0.93) 0%,
+          rgba(0,85,164,0.88) 55%,
+          rgba(244,121,32,0.65) 100%),
+        url('/assets/img/campus-hero.jpg') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px 56px;
+      text-align: center;
+      position: relative;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 40px;
+      background: #F0F4FF;
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+
+    /* Stats strip */
+    .stats-strip {
+      background: #003087;
+      border-bottom: 3px solid #F47920;
+    }
+    .stats-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .stat-item {
+      padding: 20px;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      display: block;
+      line-height: 1;
+    }
+    .stat-lbl {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.55);
+      font-weight: 700;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* Search */
+    .search-wrap { position: relative; max-width: 680px; width: 100%; margin: 20px auto 0; }
+    .search-input {
+      width: 100%;
+      height: 58px;
+      padding: 0 130px 0 56px;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 29px;
+      background: rgba(255,255,255,0.96);
+      font-size: 1rem;
+      color: #1A1A2E;
+      outline: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: all 0.25s;
+    }
+    .search-input:focus {
+      border-color: #F47920;
+      box-shadow: 0 4px 24px rgba(244,121,32,0.3);
+    }
+    .search-icon {
+      position: absolute;
+      left: 20px; top: 50%;
+      transform: translateY(-50%);
+      color: #9CA3AF;
+      font-size: 1rem;
+      pointer-events: none;
+    }
+    .search-btn {
+      position: absolute;
+      right: 6px; top: 6px;
+      height: 46px;
+      padding: 0 22px;
+      background: #F47920;
+      color: white;
+      border: none;
+      border-radius: 23px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .search-btn:hover { background: #ff8c35; }
+    .clear-btn {
+      position: absolute;
+      right: 128px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #9CA3AF;
+      cursor: pointer;
+      font-size: 1rem;
+      display: none;
+    }
+
+    /* Autocomplete */
+    .autocomplete-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0; right: 0;
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      z-index: 50;
+      overflow: hidden;
+      display: none;
+    }
+    .autocomplete-item {
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #F3F4F6;
+      transition: background 0.1s;
+    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: #EBF2FF; color: #003087; }
+
+    /* Filter panel */
+    .filter-panel {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0,48,135,0.06);
+    }
+    .filter-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .filter-select {
+      height: 36px;
+      padding: 0 10px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      background: white;
+      color: #374151;
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 150px;
+    }
+    .filter-select:focus { border-color: #003087; }
+
+    /* Status pills */
+    .status-pill {
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid #E5E7EB;
+      color: #6B7280;
+      background: white;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .status-pill:hover { border-color: #003087; color: #003087; }
+    .status-pill.active { background: #F47920; color: white; border-color: #F47920; }
+
+    /* Year/gender pills (smaller) */
+    .yr-pill {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1.5px solid #E5E7EB;
+      background: white;
+      color: #6B7280;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .yr-pill:hover { border-color: #003087; color: #003087; }
+    .yr-pill.active { background: #003087; color: white; border-color: #003087; }
+
+    /* Results toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    /* Export buttons */
+    .export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 14px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      background: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: #374151;
+    }
+    .export-btn:hover { border-color: #003087; color: #003087; }
+
+    /* View toggle */
+    .view-toggle {
+      display: flex;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .view-btn {
+      width: 34px;
+      height: 34px;
+      border: none;
+      background: white;
+      color: #9CA3AF;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .view-btn.active { background: #003087; color: white; }
+
+    /* Results container */
+    .results-box {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,48,135,0.06);
+      overflow: hidden;
+    }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table thead { background: #003087; position: sticky; top: 64px; z-index: 5; }
+    .data-table th {
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: white;
+      cursor: pointer;
+      white-space: nowrap;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .data-table th:last-child { border-right: none; }
+    .data-table th:hover { background: #0055A4; }
+    .data-table td {
+      padding: 11px 14px;
+      border-bottom: 1px solid #F3F4F6;
+      color: #374151;
+      vertical-align: middle;
+    }
+    .data-table tr:hover td { background: #EBF2FF; }
+    .data-table tr:nth-child(even) td { background: #F8FAFF; }
+    .data-table tr:nth-child(even):hover td { background: #EBF2FF; }
+
+    /* Grid */
+    .grid-view {
+      display: none;
+      padding: 20px;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .student-card {
+      background: white;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .student-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #003087, #F47920);
+    }
+    .student-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,48,135,0.12);
+      border-color: #C3D4F0;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,48,135,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-panel {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 740px;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      animation: scaleIn 0.25s ease;
+    }
+    .modal-header {
+      background: linear-gradient(135deg, #003087, #0055A4);
+      color: white;
+      padding: 22px 26px;
+      border-radius: 16px 16px 0 0;
+    }
+    .tab-bar {
+      display: flex;
+      border-bottom: 2px solid #F3F4F6;
+      background: #F8FAFF;
+    }
+    .tab-btn {
+      padding: 12px 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #9CA3AF;
+      cursor: pointer;
+      border: none;
+      background: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: #003087; }
+    .tab-btn.active { color: #003087; border-bottom-color: #F47920; }
+
+    /* Pagination */
+    .page-btn {
+      min-width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      border: 1px solid #E5E7EB;
+      background: white;
+      color: #374151;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      transition: all 0.15s;
+    }
+    .page-btn:hover { border-color: #003087; color: #003087; }
+    .page-btn.active { background: #003087; color: white; border-color: #003087; }
+
+    /* Footer */
+    .footer {
+      background: #003087;
+      color: rgba(255,255,255,0.7);
+      padding: 32px 24px 16px;
+      margin-top: 48px;
+    }
+
+    /* Skeleton */
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    /* Toast */
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity:0; transform:scale(0.96); }
+      to   { opacity:1; transform:scale(1); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .navbar-inner { padding: 10px 16px; }
+      .hero { min-height: 260px; padding: 32px 16px 48px; }
+      .modal-panel { width: 96%; max-height: 92vh; }
+      .filter-panel { overflow-x: auto; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- TOP GOVERNMENT BAR -->
+<!-- TOP GOVT BAR -->
 <div class="top-bar">
   <span>
-    <img src="/assets/img/govt-icon.png" style="height:16px;vertical-align:middle;margin-right:6px">
-    Maharashtra Government | Government of Maharashtra
+    <img src="/assets/img/govt-icon.png"
+         style="height:14px;vertical-align:middle;margin-right:5px"
+         onerror="this.style.display='none'">
+    महाराष्ट्र शासन | Government of Maharashtra
   </span>
-  <span>
-    <a href="http://bamu.ac.in" target="_blank" style="color:#aaa;text-decoration:none">
-      Visit Official University Website &rarr;
-    </a>
-  </span>
+  <a href="http://bamu.ac.in" target="_blank">
+    Visit Official University Website →
+  </a>
 </div>
 
-<!-- MAIN NAVBAR -->
+<!-- NAVBAR -->
 <nav class="navbar">
-  <div style="max-width:1200px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;justify-content:space-between">
-    <div style="display:flex;align-items:center;gap:14px">
-      <img src="/assets/img/bamu-logo.png" alt="BAMU Logo" style="height:52px;filter:brightness(1.1)">
+  <div class="navbar-inner">
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="/assets/img/bamu-logo.png" alt="BAMU Logo"
+           id="navLogo"
+           style="height:52px;filter:brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,0.3))"
+           onerror="this.style.display='none'">
       <div>
-        <div style="font-size:0.7rem;color:rgba(255,255,255,0.6);line-height:1.2">
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.55);
+          line-height:1.2;letter-spacing:0.02em">
           Dr. Babasaheb Ambedkar Marathwada University
         </div>
-        <div style="font-weight:700;color:white;font-size:1.1rem;letter-spacing:-0.02em">
+        <div style="font-weight:800;color:white;font-size:1.05rem;
+          display:flex;align-items:center;gap:8px">
           UniSearch
-          <span style="font-size:0.7rem;background:var(--orange);padding:2px 8px;border-radius:4px;font-weight:600;margin-left:6px;vertical-align:middle">
+          <span style="background:#F47920;color:white;
+            font-size:0.62rem;padding:2px 8px;border-radius:4px;
+            font-weight:700;letter-spacing:0.04em">
             Student Portal
           </span>
         </div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:#6EE7B7">
-        <span style="width:7px;height:7px;border-radius:50%;background:#6EE7B7;animation:pulse 2s infinite"></span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="display:flex;align-items:center;gap:5px;
+        font-size:0.72rem;color:#6EE7B7;font-weight:600">
+        <span style="width:7px;height:7px;border-radius:50%;
+          background:#6EE7B7;
+          animation:pulse 2s ease infinite"></span>
         Live System
       </span>
-      <button onclick="toggleTheme()" id="themeBtn" style="background:rgba(255,255,255,0.1);border:none;color:white;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:0.85rem">
+      <button id="themeBtn" onclick="toggleTheme()"
+        style="background:rgba(255,255,255,0.1);border:none;
+        color:white;padding:8px 10px;border-radius:7px;
+        cursor:pointer;font-size:0.9rem">
         <i class="fa fa-moon"></i>
       </button>
-      <a href="/admin" style="background:var(--orange);color:white;padding:8px 18px;border-radius:6px;font-size:0.85rem;font-weight:600;text-decoration:none">
-        <i class="fa fa-lock" style="margin-right:5px"></i>
-        Admin
+      <a href="/admin"
+         style="background:#F47920;color:white;padding:9px 16px;
+         border-radius:7px;font-size:0.82rem;font-weight:700;
+         text-decoration:none;display:flex;align-items:center;gap:6px">
+        <i class="fa fa-lock"></i> Admin
       </a>
     </div>
   </div>
 </nav>
 
-<!-- ANNOUNCEMENTS TICKER -->
+<!-- TICKER -->
 <div class="ticker-wrap">
-  <span style="padding:0 24px;font-weight:600">&#128226; Latest:</span>
-  <span class="ticker">
-    &nbsp;&nbsp;&nbsp;
-    Welcome to Dr. BAMU UniSearch Portal - Official Student Database System
-    &nbsp;|&nbsp;
-    Students can search their academic records including semester-wise performance
-    &nbsp;|&nbsp;
-    NAAC Accredited Grade B++ University
-    &nbsp;|&nbsp;
-    Ranked 46th in State Public Universities (NIRF 2024)
-    &nbsp;|&nbsp;
-    489 Affiliated Colleges | 4.5 Lakh+ Students
-    &nbsp;&nbsp;&nbsp;
+  <span style="padding:0 20px;font-weight:700">📢 Latest:</span>
+  <span class="ticker-inner">
+    &nbsp;&nbsp; Welcome to Dr. BAMU UniSearch Portal — Official Student Database System
+    &nbsp;|&nbsp; NAAC Accredited Grade B++ University
+    &nbsp;|&nbsp; Ranked 46th in State Public Universities (NIRF 2024)
+    &nbsp;|&nbsp; 489 Affiliated Colleges &nbsp;|&nbsp; 4.5 Lakh+ Students
+    &nbsp;|&nbsp; Chhatrapati Sambhajinagar, Maharashtra &nbsp;&nbsp;
   </span>
 </div>
 
-<!-- HERO SECTION -->
-<div class="hero" style="background: linear-gradient(135deg, rgba(0,48,135,0.92) 0%, rgba(0,85,164,0.88) 50%, rgba(244,121,32,0.7) 100%), url('/assets/img/campus-hero.jpg') center/cover no-repeat;">
-  <div style="margin-bottom:16px">
-    <span style="background:rgba(255,255,255,0.15);color:white;padding:6px 18px;border-radius:999px;font-size:0.82rem;font-weight:600;border:1px solid rgba(255,255,255,0.2)">
-      &#127891; Official Student Information System
+<!-- HERO -->
+<div class="hero">
+  <div style="margin-bottom:14px">
+    <span style="background:rgba(255,255,255,0.12);color:white;
+      padding:6px 18px;border-radius:999px;font-size:0.78rem;
+      font-weight:600;border:1px solid rgba(255,255,255,0.2)">
+      🎓 Official Student Information System
     </span>
   </div>
-  <h1 style="color:white;font-size:2.8rem;font-weight:800;margin:0 0 10px;line-height:1.15;letter-spacing:-0.03em">
-    Find Any Student <span style="color:var(--orange)">.</span>
+  <h1 style="color:white;font-size:2.6rem;font-weight:800;
+    margin:0 0 10px;line-height:1.15;letter-spacing:-0.02em">
+    Find Any Student
+    <span style="color:#F47920">.</span>
   </h1>
-  <p style="color:rgba(255,255,255,0.8);font-size:1rem;margin:0 0 24px;max-width:500px">
-    Search across all Dr. BAMU departments by name, ID, batch, semester or enrollment status
+  <p style="color:rgba(255,255,255,0.75);font-size:0.95rem;
+    margin:0 0 20px;max-width:500px">
+    Search across all Dr. BAMU departments by name,
+    ID, batch, semester or enrollment status
   </p>
-  
-  <div class="search-wrapper">
-    <i class="fa fa-search" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);color:#999;font-size:1rem;z-index:1"></i>
-    <input type="text" id="searchInput" class="search-input" placeholder="Search student name, ID, department..." autocomplete="off">
-    <button class="search-btn" onclick="search()">
-      <i class="fa fa-search" style="margin-right:5px"></i> Search
+
+  <!-- Search bar -->
+  <div class="search-wrap">
+    <i class="fa fa-search search-icon"></i>
+    <input type="text" id="searchInput"
+           class="search-input"
+           placeholder="Search student name, ID, department..."
+           autocomplete="off">
+    <button id="clearSearchBtn" class="clear-btn"
+            onclick="clearSearch()">
+      <i class="fa fa-times"></i>
     </button>
-    <div id="autocompleteDropdown" class="autocomplete-dropdown hidden"></div>
+    <button class="search-btn" onclick="search()">
+      <i class="fa fa-search"
+         style="margin-right:5px"></i>Search
+    </button>
+    <div id="autocompleteDropdown"
+         class="autocomplete-dropdown"></div>
   </div>
 
-  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px">
-    <span onclick="quickSearch('Computer Science')" style="background:rgba(255,255,255,0.15);color:white;padding:4px 14px;border-radius:999px;font-size:0.78rem;cursor:pointer;border:1px solid rgba(255,255,255,0.2)">Computer Science</span>
-    <span onclick="quickSearch('active')" style="background:rgba(255,255,255,0.15);color:white;padding:4px 14px;border-radius:999px;font-size:0.78rem;cursor:pointer;border:1px solid rgba(255,255,255,0.2)">Active Students</span>
-    <span onclick="quickSearch('2021')" style="background:rgba(255,255,255,0.15);color:white;padding:4px 14px;border-radius:999px;font-size:0.78rem;cursor:pointer;border:1px solid rgba(255,255,255,0.2)">Batch 2021</span>
-    <span onclick="quickSearch('MBA')" style="background:rgba(255,255,255,0.15);color:white;padding:4px 14px;border-radius:999px;font-size:0.78rem;cursor:pointer;border:1px solid rgba(255,255,255,0.2)">MBA</span>
+  <!-- Quick search tags -->
+  <div style="display:flex;gap:7px;flex-wrap:wrap;
+    justify-content:center;margin-top:14px">
+    <span onclick="quickSearch('Computer Science')"
+          style="background:rgba(255,255,255,0.12);color:white;
+          padding:4px 13px;border-radius:999px;font-size:0.75rem;
+          cursor:pointer;border:1px solid rgba(255,255,255,0.2);
+          transition:background 0.15s"
+          onmouseover="this.style.background='rgba(255,255,255,0.22)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+      Computer Science
+    </span>
+    <span onclick="quickSearch('active')"
+          style="background:rgba(255,255,255,0.12);color:white;
+          padding:4px 13px;border-radius:999px;font-size:0.75rem;
+          cursor:pointer;border:1px solid rgba(255,255,255,0.2)"
+          onmouseover="this.style.background='rgba(255,255,255,0.22)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+      Active Students
+    </span>
+    <span onclick="quickSearch('2021')"
+          style="background:rgba(255,255,255,0.12);color:white;
+          padding:4px 13px;border-radius:999px;font-size:0.75rem;
+          cursor:pointer;border:1px solid rgba(255,255,255,0.2)"
+          onmouseover="this.style.background='rgba(255,255,255,0.22)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+      Batch 2021
+    </span>
+    <span onclick="quickSearch('MBA')"
+          style="background:rgba(255,255,255,0.12);color:white;
+          padding:4px 13px;border-radius:999px;font-size:0.75rem;
+          cursor:pointer;border:1px solid rgba(255,255,255,0.2)"
+          onmouseover="this.style.background='rgba(255,255,255,0.22)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+      MBA
+    </span>
+    <span onclick="quickSearch('Law')"
+          style="background:rgba(255,255,255,0.12);color:white;
+          padding:4px 13px;border-radius:999px;font-size:0.75rem;
+          cursor:pointer;border:1px solid rgba(255,255,255,0.2)"
+          onmouseover="this.style.background='rgba(255,255,255,0.22)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+      Law
+    </span>
   </div>
 </div>
 
 <!-- STATS STRIP -->
-<div style="background:var(--navy); border-bottom:3px solid var(--orange)">
-  <div style="max-width:1200px;margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr)">
-    <div style="padding:22px 20px; text-align:center; border-right:1px solid rgba(255,255,255,0.1)">
-      <span id="heroTotal" style="font-size:2.2rem;font-weight:800; color:#FFFFFF;display:block; line-height:1">&mdash;</span>
-      <span style="font-size:0.72rem; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:0.1em; margin-top:4px;display:block">TOTAL STUDENTS</span>
+<div class="stats-strip">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <span id="heroTotal" class="stat-num" style="color:#FFFFFF">—</span>
+      <span class="stat-lbl">Total Students</span>
     </div>
-    <div style="padding:22px 20px; text-align:center; border-right:1px solid rgba(255,255,255,0.1)">
-      <span id="heroActive" style="font-size:2.2rem;font-weight:800; color:#6EE7B7;display:block; line-height:1">&mdash;</span>
-      <span style="font-size:0.72rem; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:0.1em; margin-top:4px;display:block">ACTIVE ENROLLED</span>
+    <div class="stat-item">
+      <span id="heroActive" class="stat-num" style="color:#6EE7B7">—</span>
+      <span class="stat-lbl">Active Enrolled</span>
     </div>
-    <div style="padding:22px 20px; text-align:center; border-right:1px solid rgba(255,255,255,0.1)">
-      <span id="heroDepts" style="font-size:2.2rem;font-weight:800; color:#93C5FD;display:block; line-height:1">&mdash;</span>
-      <span style="font-size:0.72rem; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:0.1em; margin-top:4px;display:block">DEPARTMENTS</span>
+    <div class="stat-item">
+      <span id="heroDepts" class="stat-num" style="color:#93C5FD">—</span>
+      <span class="stat-lbl">Departments</span>
     </div>
-    <div style="padding:22px 20px; text-align:center">
-      <span id="heroBatches" style="font-size:2.2rem;font-weight:800; color:#FCD34D;display:block; line-height:1">&mdash;</span>
-      <span style="font-size:0.72rem; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:0.1em; margin-top:4px;display:block">ACTIVE BATCHES</span>
+    <div class="stat-item">
+      <span id="heroBatches" class="stat-num" style="color:#FCD34D">—</span>
+      <span class="stat-lbl">Active Batches</span>
     </div>
   </div>
 </div>
 
 <!-- MAIN CONTENT -->
-<div style="max-width:1200px;margin:24px auto;padding:0 24px">
+<div style="max-width:1200px;margin:0 auto;padding:24px 20px">
+
+  <!-- FILTER PANEL -->
   <div class="filter-panel">
-    <div class="filter-heading"><i class="fa fa-filter"></i> Advanced Filters <button id="clearFiltersBtn" onclick="clearFilters()" class="btn btn-sm btn-outline hidden" style="margin-left:auto;font-size:0.72rem"><i class="fa fa-times"></i> Clear All</button></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <span class="status-pill active" data-status="" onclick="setStatus(this, '')">All Students</span>
-      <span class="status-pill" data-status="active" onclick="setStatus(this, 'active')">Active</span>
-      <span class="status-pill" data-status="graduated" onclick="setStatus(this, 'graduated')">Graduated</span>
-      <span class="status-pill" data-status="dropped" onclick="setStatus(this, 'dropped')">Dropped</span>
-      <span class="status-pill" data-status="transferred" onclick="setStatus(this, 'transferred')">Transferred</span>
-      <span class="status-pill" data-status="suspended" onclick="setStatus(this, 'suspended')">Suspended</span>
+    <div style="display:flex;align-items:center;
+      justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:0.75rem;font-weight:700;color:#003087;
+        display:flex;align-items:center;gap:6px">
+        <span style="width:3px;height:14px;background:#F47920;
+          border-radius:2px;display:inline-block"></span>
+        <i class="fa fa-filter"
+           style="font-size:0.8rem"></i> Advanced Filters
+      </div>
+      <button id="clearFiltersBtn"
+              onclick="clearFilters()"
+              class="hidden"
+              style="display:none;padding:5px 12px;
+              border:1.5px solid #003087;border-radius:6px;
+              background:white;color:#003087;font-size:0.72rem;
+              font-weight:700;cursor:pointer">
+        <i class="fa fa-times"></i> Clear All
+      </button>
     </div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+
+    <!-- Status pills -->
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="status-pill active" data-status=""
+              onclick="setStatus(this,'')">All Students</button>
+      <button class="status-pill" data-status="active"
+              onclick="setStatus(this,'active')">
+        <span style="display:inline-block;width:6px;height:6px;
+          border-radius:50%;background:#10B981;margin-right:4px;
+          vertical-align:middle"></span>Active
+      </button>
+      <button class="status-pill" data-status="graduated"
+              onclick="setStatus(this,'graduated')">
+        <span style="display:inline-block;width:6px;height:6px;
+          border-radius:50%;background:#3B82F6;margin-right:4px;
+          vertical-align:middle"></span>Graduated
+      </button>
+      <button class="status-pill" data-status="dropped"
+              onclick="setStatus(this,'dropped')">
+        <span style="display:inline-block;width:6px;height:6px;
+          border-radius:50%;background:#EF4444;margin-right:4px;
+          vertical-align:middle"></span>Dropped
+      </button>
+      <button class="status-pill" data-status="transferred"
+              onclick="setStatus(this,'transferred')">
+        <span style="display:inline-block;width:6px;height:6px;
+          border-radius:50%;background:#06B6D4;margin-right:4px;
+          vertical-align:middle"></span>Transferred
+      </button>
+      <button class="status-pill" data-status="suspended"
+              onclick="setStatus(this,'suspended')">
+        <span style="display:inline-block;width:6px;height:6px;
+          border-radius:50%;background:#F59E0B;margin-right:4px;
+          vertical-align:middle"></span>Suspended
+      </button>
+    </div>
+
+    <!-- Dropdowns + year pills -->
+    <div style="display:flex;gap:14px;flex-wrap:wrap;
+      align-items:flex-end">
       <div>
-        <label style="font-size:0.72rem;font-weight:600;color:var(--text-s);display:block;margin-bottom:4px">DEPARTMENT</label>
-        <select id="deptFilter" onchange="search()"><option value="">All Departments</option></select>
+        <label class="filter-label">Department</label>
+        <select id="deptFilter" class="filter-select"
+                onchange="state.department_name=this.value;
+                state.page=1;search()">
+          <option value="">All Departments</option>
+        </select>
       </div>
       <div>
-        <label style="font-size:0.72rem;font-weight:600;color:var(--text-s);display:block;margin-bottom:4px">ADMISSION YEAR</label>
-        <select id="admYearFilter" onchange="search()"><option value="">All Years</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option></select>
+        <label class="filter-label">Admission Year</label>
+        <select id="admYearFilter" class="filter-select"
+                onchange="state.admission_year=this.value;
+                state.page=1;search()">
+          <option value="">All Years</option>
+          <option>2024</option><option>2023</option>
+          <option>2022</option><option>2021</option>
+          <option>2020</option><option>2019</option>
+          <option>2018</option>
+        </select>
+      </div>
+      <div>
+        <label class="filter-label">Study Year</label>
+        <div style="display:flex;gap:5px">
+          <button class="yr-pill active" data-year=""
+                  onclick="setYear(this,'')">All</button>
+          <button class="yr-pill" data-year="1"
+                  onclick="setYear(this,'1')">1</button>
+          <button class="yr-pill" data-year="2"
+                  onclick="setYear(this,'2')">2</button>
+          <button class="yr-pill" data-year="3"
+                  onclick="setYear(this,'3')">3</button>
+          <button class="yr-pill" data-year="4"
+                  onclick="setYear(this,'4')">4</button>
+          <button class="yr-pill" data-year="5"
+                  onclick="setYear(this,'5')">5</button>
+        </div>
+      </div>
+      <div>
+        <label class="filter-label">Gender</label>
+        <div style="display:flex;gap:5px">
+          <button class="yr-pill active" data-gender=""
+                  onclick="setGender(this,'')">All</button>
+          <button class="yr-pill" data-gender="Male"
+                  onclick="setGender(this,'Male')">M</button>
+          <button class="yr-pill" data-gender="Female"
+                  onclick="setGender(this,'Female')">F</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
-    <div style="font-size:0.875rem;color:var(--text-s)">Showing <strong id="resultsFrom">0</strong>&ndash;<strong id="resultsTo">0</strong> of <strong id="resultsTotal">0</strong> students</div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden">
-        <button id="viewTableBtn" onclick="setView('table')" class="btn btn-icon" style="border-radius:0;border:none"><i class="fa fa-table"></i></button>
-        <button id="viewGridBtn" onclick="setView('grid')" class="btn btn-icon" style="border-radius:0;border:none"><i class="fa fa-grip"></i></button>
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div style="font-size:0.875rem;color:#6B7280">
+      Showing
+      <strong id="resultsFrom" style="color:#003087">0</strong>–
+      <strong id="resultsTo"   style="color:#003087">0</strong>
+      of
+      <strong id="resultsTotal" style="color:#003087">0</strong>
+      students
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="view-toggle">
+        <button id="viewTableBtn" class="view-btn active"
+                onclick="setView('table')" title="Table view">
+          <i class="fa fa-table"></i>
+        </button>
+        <button id="viewGridBtn" class="view-btn"
+                onclick="setView('grid')" title="Grid view">
+          <i class="fa fa-grip"></i>
+        </button>
       </div>
-      <div id="exportButtons" style="display:flex;gap:6px">
-        <button onclick="exportPDF()" class="btn btn-sm btn-outline"><i class="fa fa-file-pdf" style="color:#EF4444"></i> PDF</button>
-        <button onclick="exportExcel()" class="btn btn-sm btn-outline"><i class="fa fa-file-excel" style="color:#10B981"></i> Excel</button>
-        <button onclick="exportCSV()" class="btn btn-sm btn-outline"><i class="fa fa-file-csv" style="color:var(--navy)"></i> CSV</button>
-      </div>
+      <select onchange="setSort(this.value)"
+              style="height:34px;padding:0 8px;
+              border:1px solid #E5E7EB;border-radius:7px;
+              font-size:0.78rem;background:white;color:#374151;
+              outline:none">
+        <option value="full_name">Name A-Z</option>
+        <option value="student_id">Student ID</option>
+        <option value="admission_year">Admission Year</option>
+        <option value="created_at">Join Date</option>
+      </select>
+      <select id="limitSelect" onchange="changeLimit(this.value)"
+              style="height:34px;padding:0 8px;
+              border:1px solid #E5E7EB;border-radius:7px;
+              font-size:0.78rem;background:white;color:#374151;
+              outline:none">
+        <option value="10">10/page</option>
+        <option value="25" selected>25/page</option>
+        <option value="50">50/page</option>
+        <option value="100">100/page</option>
+      </select>
+      <button class="export-btn" onclick="exportPDF()">
+        <i class="fa fa-file-pdf"
+           style="color:#EF4444"></i>PDF
+      </button>
+      <button class="export-btn" onclick="exportExcel()">
+        <i class="fa fa-file-excel"
+           style="color:#10B981"></i>Excel
+      </button>
+      <button class="export-btn" onclick="exportCSV()">
+        <i class="fa fa-file-csv"
+           style="color:#003087"></i>CSV
+      </button>
     </div>
   </div>
 
-  <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
-    <div id="tableView">
-      <div style="overflow-x:auto">
-        <table class="data-table">
-          <thead><tr><th>#</th><th>Student</th><th>ID</th><th>Department</th><th>Batch</th><th>Academic Year</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
+  <!-- RESULTS -->
+  <div class="results-box">
+
+    <!-- TABLE VIEW -->
+    <div id="tableView" style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:44px">#</th>
+            <th onclick="toggleSort('full_name')">
+              Student <i class="fa fa-sort"
+                style="opacity:0.4;font-size:0.7rem"></i>
+            </th>
+            <th onclick="toggleSort('student_id')">
+              ID <i class="fa fa-sort"
+                style="opacity:0.4;font-size:0.7rem"></i>
+            </th>
+            <th>Department</th>
+            <th onclick="toggleSort('admission_year')">
+              Batch <i class="fa fa-sort"
+                style="opacity:0.4;font-size:0.7rem"></i>
+            </th>
+            <th>Academic Year</th>
+            <th>Status</th>
+            <th style="width:80px">Action</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td colspan="8" style="text-align:center;
+              padding:40px;color:#9CA3AF">
+              <i class="fa fa-spinner fa-spin"
+                 style="font-size:1.5rem;display:block;
+                 margin-bottom:8px"></i>
+              Loading students...
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div id="gridView" style="display:none;padding:20px"><div id="gridContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"></div></div>
+
+    <!-- GRID VIEW -->
+    <div id="gridView" class="grid-view">
+      <div id="gridContainer" class="cards-grid"></div>
+    </div>
+
   </div>
 
-  <div id="paginationArea" style="display:flex;align-items:center;justify-content:center;margin-top:24px"><div id="pageBtns" style="display:flex;gap:4px"></div></div>
-</div>
+  <!-- PAGINATION -->
+  <div style="display:flex;align-items:center;
+    justify-content:space-between;flex-wrap:wrap;
+    gap:10px;margin-top:16px">
+    <div style="font-size:0.78rem;color:#9CA3AF">
+      Page <strong id="currentPage">1</strong>
+      of <strong id="totalPagesEl">1</strong>
+    </div>
+    <div id="pageBtns" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+  </div>
 
-<!-- Modal -->
-<div id="studentModal" class="modal-backdrop" style="display:none" onclick="handleBackdropClick(event)">
+</div><!-- /main content -->
+
+<!-- STUDENT MODAL -->
+<div id="studentModal"
+     class="modal-backdrop"
+     onclick="handleBackdropClick(event)">
   <div class="modal-panel" id="modalPanel">
+
+    <!-- Header -->
     <div class="modal-header" id="modalHeader">
-       <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer"><i class="fa fa-times"></i></button>
-       <div style="display:flex;align-items:center;gap:16px">
-          <div id="modalAvatar" style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:white"></div>
-          <div><div id="modalName" style="font-size:1.3rem;font-weight:700;color:white"></div><div id="modalMeta" style="margin-top:4px"></div></div>
-       </div>
+      <button onclick="closeModal()"
+        style="position:absolute;top:14px;right:14px;
+        background:rgba(255,255,255,0.15);border:none;
+        color:white;width:30px;height:30px;border-radius:50%;
+        cursor:pointer;font-size:0.85rem">
+        <i class="fa fa-times"></i>
+      </button>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div id="modalAvatar"
+             style="width:68px;height:68px;border-radius:50%;
+             background:rgba(255,255,255,0.2);
+             border:3px solid rgba(255,255,255,0.35);
+             display:flex;align-items:center;justify-content:center;
+             font-size:1.4rem;font-weight:800;color:white;
+             flex-shrink:0">
+        </div>
+        <div>
+          <div id="modalName"
+               style="font-size:1.25rem;font-weight:800;
+               color:white;margin-bottom:6px">
+          </div>
+          <div id="modalMeta"
+               style="display:flex;gap:8px;flex-wrap:wrap">
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Tabs -->
     <div class="tab-bar">
-       <button class="tab-btn active" onclick="setTab('overview')">Overview</button>
-       <button class="tab-btn" onclick="setTab('semesters')">Semesters</button>
-       <button class="tab-btn" onclick="setTab('contact')">Contact</button>
+      <button class="tab-btn active"
+              onclick="setTab('overview')">
+        <i class="fa fa-user"
+           style="margin-right:5px"></i>Overview
+      </button>
+      <button class="tab-btn"
+              onclick="setTab('semesters')">
+        <i class="fa fa-graduation-cap"
+           style="margin-right:5px"></i>Semesters
+      </button>
+      <button class="tab-btn"
+              onclick="setTab('contact')">
+        <i class="fa fa-address-book"
+           style="margin-right:5px"></i>Contact
+      </button>
     </div>
-    <div style="padding:24px"><div id="tabOverview"></div><div id="tabSemesters" style="display:none"></div><div id="tabContact" style="display:none"></div></div>
+
+    <!-- Tab content -->
+    <div style="padding:22px 24px">
+      <div id="tabOverview"></div>
+      <div id="tabSemesters" style="display:none"></div>
+      <div id="tabContact"   style="display:none"></div>
+    </div>
+
   </div>
 </div>
 
+<!-- FOOTER -->
 <footer class="footer">
-  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px">
+  <div style="max-width:1200px;margin:0 auto;
+    display:grid;grid-template-columns:2fr 1fr 1fr;
+    gap:28px">
     <div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <img src="/assets/img/bamu-logo.png" style="height:40px;filter:brightness(0) invert(1)">
-        <div><div style="font-weight:700;color:white;font-size:0.95rem">UniSearch</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.5)">Student Information Portal</div></div>
+      <div style="display:flex;align-items:center;
+        gap:10px;margin-bottom:10px">
+        <img src="/assets/img/bamu-logo-white.png"
+             alt="BAMU"
+             style="height:36px"
+             onerror="this.style.display='none'">
+        <div>
+          <div style="font-weight:800;color:white;
+            font-size:0.9rem">UniSearch</div>
+          <div style="font-size:0.62rem;
+            color:rgba(255,255,255,0.4);
+            text-transform:uppercase;letter-spacing:0.06em">
+            Student Information Portal
+          </div>
+        </div>
       </div>
-      <p style="font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.7;max-width:320px">Official student database system of Dr. Babasaheb Ambedkar Marathwada University, Chhatrapati Sambhajinagar, Maharashtra.</p>
+      <p style="font-size:0.78rem;
+        color:rgba(255,255,255,0.55);line-height:1.7;
+        max-width:300px">
+        Official student database of Dr. Babasaheb Ambedkar
+        Marathwada University, Chhatrapati Sambhajinagar, Maharashtra.
+      </p>
     </div>
     <div>
-      <div style="font-weight:700;color:white;margin-bottom:10px;font-size:0.85rem">Quick Links</div>
-      <div style="display:flex;flex-direction:column;gap:6px"><a href="http://bamu.ac.in" style="color:rgba(255,255,255,0.6);font-size:0.82rem">BAMU Official Website</a><a href="https://bamua.digitaluniversity.ac" style="color:rgba(255,255,255,0.6);font-size:0.82rem">Examination Portal</a></div>
+      <div style="font-weight:700;color:white;
+        margin-bottom:8px;font-size:0.8rem">
+        Quick Links
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <a href="http://bamu.ac.in" target="_blank"
+           style="color:rgba(255,255,255,0.55);
+           text-decoration:none;font-size:0.78rem">
+          BAMU Official Website
+        </a>
+        <a href="http://bamu.ac.in/en/studentcornerpage/"
+           target="_blank"
+           style="color:rgba(255,255,255,0.55);
+           text-decoration:none;font-size:0.78rem">
+          Student Corner
+        </a>
+        <a href="https://bamua.digitaluniversity.ac"
+           target="_blank"
+           style="color:rgba(255,255,255,0.55);
+           text-decoration:none;font-size:0.78rem">
+          Examination Portal
+        </a>
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:white;
+        margin-bottom:8px;font-size:0.8rem">Contact</div>
+      <div style="font-size:0.72rem;
+        color:rgba(255,255,255,0.55);line-height:1.9">
+        University Campus,<br>
+        Near Soneri Mahal, Jaisingpura,<br>
+        Chhatrapati Sambhajinagar - 431004<br>
+        Maharashtra<br>
+        Ph: +91-0240-2403399
+      </div>
     </div>
   </div>
-  <div class="footer-bottom">&copy; 2025 Dr. Babasaheb Ambedkar Marathwada University. UniSearch Student Portal.</div>
+  <div style="border-top:1px solid rgba(255,255,255,0.1);
+    margin-top:20px;padding-top:14px;font-size:0.72rem;
+    text-align:center;color:rgba(255,255,255,0.35)">
+    © 2025 Dr. Babasaheb Ambedkar Marathwada University.
+    UniSearch Student Portal. All rights reserved.
+  </div>
 </footer>
 
+<!-- CDN Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="/assets/js/main.js"></script>
 <script src="/assets/js/export.js"></script>
+
+<script>
+// Clear search helper
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('clearSearchBtn').style.display = 'none';
+  document.getElementById('autocompleteDropdown').style.display = 'none';
+  state.query = '';
+  state.page  = 1;
+  search();
+}
+// Show clear btn when typing
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('searchInput')
+    .addEventListener('input', e => {
+      document.getElementById('clearSearchBtn').style.display =
+        e.target.value ? 'flex' : 'none';
+    });
+});
+</script>
+
 </body>
 </html>
