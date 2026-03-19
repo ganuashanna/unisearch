@@ -1,6 +1,7 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/api/test",         "destination": "/api/test.js" },
     { "source": "/api/search",       "destination": "/api/search.js" },
     { "source": "/api/autocomplete", "destination": "/api/autocomplete.js" },
     { "source": "/api/student",      "destination": "/api/student.js" },
@@ -17,3 +18,4 @@
     { "source": "/(.*)",             "destination": "/public/index.html" }
   ]
 }
+
