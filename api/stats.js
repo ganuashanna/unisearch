@@ -1,76 +1,40 @@
-import { supabaseRequest, setCors } from './_supabase.js';
-
-function average(values) {
-  if (!values.length) return 0;
-  const total = values.reduce((sum, value) => sum + value, 0);
-  return Number((total / values.length).toFixed(2));
-}
+import { supabaseRequest } from './_supabase.js';
 
 export default async function handler(req, res) {
-  setCors(res);
-  if (req.method === 'OPTIONS')
-    return res.status(200).end();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Content-Type', 'application/json');
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const [stuRes, deptRes, semRes] = await Promise.all([
-    supabaseRequest('GET',
-      '/rest/v1/students?select=id,enrollment_status,admission_year,department_id,department_name'
-    ),
-    supabaseRequest('GET',
-      '/rest/v1/departments?select=id'
-    ),
-    supabaseRequest('GET',
-      '/rest/v1/semesters?select=student_id,semester_number,cgpa&cgpa=not.is.null&order=student_id.asc,semester_number.desc'
-    ),
-  ]);
-
-  const students = Array.isArray(stuRes.data) ? stuRes.data : [];
-  const departments = Array.isArray(deptRes.data) ? deptRes.data : [];
-  const semesters = Array.isArray(semRes.data) ? semRes.data : [];
-  const counts = {
-    active: 0,
-    graduated: 0,
-    dropped: 0,
-    transferred: 0,
-    suspended: 0,
-  };
-  const batchBreakdown = {};
-  const deptKeys = new Set();
-  const latestCgpaByStudent = new Map();
-
-  for (const student of students) {
-    const status = student.enrollment_status || 'active';
-    if (counts[status] !== undefined) counts[status] += 1;
-    if (student.admission_year) {
-      batchBreakdown[student.admission_year] = (batchBreakdown[student.admission_year] || 0) + 1;
-    }
-    if (student.department_id) deptKeys.add(`id:${student.department_id}`);
-    else if (student.department_name) deptKeys.add(`name:${student.department_name}`);
-  }
-
-  for (const semester of semesters) {
-    if (!semester.student_id || latestCgpaByStudent.has(semester.student_id)) continue;
-    const cgpa = Number(semester.cgpa);
-    if (!Number.isNaN(cgpa)) {
-      latestCgpaByStudent.set(semester.student_id, cgpa);
-    }
-  }
-
-  const sortedBatches = Object.fromEntries(
-    Object.entries(batchBreakdown).sort((a, b) => Number(b[0]) - Number(a[0]))
+  const r = await supabaseRequest('GET',
+    '/rest/v1/students?select=id,enrollment_status,admission_year,department_name',
+    null, false
   );
 
-  return res.status(200).json({
-    total_students: students.length,
-    active_students: counts.active,
-    graduated_students: counts.graduated,
-    dropped_students: counts.dropped,
-    transferred_students: counts.transferred,
-    suspended_students: counts.suspended,
-    departments_count: deptKeys.size || departments.length,
-    total_departments: deptKeys.size || departments.length,
-    avg_cgpa: average([...latestCgpaByStudent.values()]),
-    batch_breakdown: sortedBatches,
-    batches: Object.keys(sortedBatches),
-    latest_batch: Object.keys(sortedBatches)[0] ?? null,
+  const students = Array.isArray(r.data) ? r.data : [];
+  const counts   = { active:0, graduated:0, dropped:0, transferred:0, suspended:0 };
+  const years    = {};
+  const depts    = new Set();
+
+  for (const s of students) {
+    const st = s.enrollment_status || 'active';
+    if (counts[st] !== undefined) counts[st]++;
+    if (s.admission_year) years[s.admission_year] = (years[s.admission_year]||0)+1;
+    if (s.department_name) depts.add(s.department_name);
+  }
+
+  const sorted = Object.fromEntries(
+    Object.entries(years).sort(([a],[b]) => b - a)
+  );
+
+  res.status(200).json({
+    total:             students.length,
+    active:            counts.active,
+    graduated:         counts.graduated,
+    dropped:           counts.dropped,
+    transferred:       counts.transferred,
+    suspended:         counts.suspended,
+    total_departments: depts.size,
+    batch_breakdown:   sorted,
+    latest_batch:      Object.keys(sorted)[0] || null,
   });
 }
