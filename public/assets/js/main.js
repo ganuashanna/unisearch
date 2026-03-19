@@ -127,7 +127,46 @@ function renderResults(students) {
         gridContainer.appendChild(buildGridCard(s));
     });
 }
+// Compute batch label client-side as fallback
+function getBatchLabel(s) {
+  if (s.batch_label && s.batch_label !== 'undefined') return s.batch_label;
+  if (!s.admission_year) return '—';
+  return s.admission_year + '–' + (s.graduation_year || 'Enrolled');
+}
 
+function getAcademicLabel(s) {
+  if (s.academic_year_label && s.academic_year_label !== 'undefined')
+    return s.academic_year_label;
+  const stat = s.enrollment_status || 'active';
+  const yr   = s.current_year;
+  const sem  = s.current_semester;
+  const sfx  = ['','st','nd','rd'];
+  if (stat === 'graduated') return 'Graduated ' + (s.graduation_year || '');
+  if (stat === 'dropped')   return 'Left ' + (s.graduation_year || '');
+  if (stat === 'transferred') return 'Transferred';
+  if (stat === 'suspended') return 'Suspended';
+  return yr ? `${yr}${sfx[yr]||'th'} Year${sem ? ' · Sem '+sem : ''}` : '—';
+}
+
+function getStatusBadge(status) {
+  const map = {
+    active:      ['Active',      '#D1FAE5','#065F46'],
+    graduated:   ['Graduated',   '#DBEAFE','#1E40AF'],
+    dropped:     ['Dropped',     '#FEE2E2','#991B1B'],
+    suspended:   ['Suspended',   '#FEF3C7','#92400E'],
+    transferred: ['Transferred', '#E0F2FE','#075985'],
+  };
+  const [label, bg, color] = map[status] || ['Unknown','#F3F4F6','#374151'];
+  return `<span style="background:${bg};color:${color};padding:3px 10px;border-radius:999px;font-size:0.7rem;font-weight:700;">${label}</span>`;
+}
+
+function getInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(' ');
+  return parts.length >= 2
+    ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+    : parts[0][0].toUpperCase();
+}
 function buildTableRow(s, num) {
     const tr = document.createElement('tr');
     tr.className = 'cursor-pointer animate-fade-in';
